@@ -390,6 +390,24 @@ body{font-family:'DM Sans','Noto Sans JP',sans-serif;background:var(--bg);color:
 .nm-del:hover{background:var(--bad-bg);color:var(--bad);}
 .nm-empty{color:var(--muted);font-size:.85rem;text-align:center;padding:1.5rem 0;}
 
+
+/* ===== 折れ線グラフ ===== */
+.chart-controls{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1rem;align-items:center;}
+.chart-toggle{
+  padding:.35rem .8rem;border:1.5px solid var(--border);border-radius:999px;
+  background:var(--surface2);font-family:inherit;font-size:.75rem;font-weight:600;
+  color:var(--muted);cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:.3rem;
+}
+.chart-toggle:hover{border-color:var(--primary);color:var(--primary);}
+.chart-toggle.on{color:#fff;}
+.chart-toggle[data-key="score"].on {background:#6c8eff;border-color:#6c8eff;}
+.chart-toggle[data-key="mood"].on  {background:#34d399;border-color:#34d399;}
+.chart-toggle[data-key="sleepy"].on{background:#fbbf24;border-color:#fbbf24;}
+.chart-toggle[data-key="body"].on  {background:#f87171;border-color:#f87171;}
+.chart-toggle[data-key="focus"].on {background:#a78bfa;border-color:#a78bfa;}
+.chart-wrap{width:100%;overflow-x:auto;}
+.chart-wrap canvas{display:block;}
+
 .rp-panel{max-width:900px;margin:0 auto;}
 .rp-controls{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:1.2rem 1.5rem;margin-bottom:1.5rem;display:flex;gap:1rem;align-items:center;flex-wrap:wrap;}
 .rp-controls label{font-size:.78rem;font-weight:700;color:var(--muted);}
@@ -1061,6 +1079,27 @@ async function populateReportSelect(){
   s.innerHTML='<option value="">-- 選択してください --</option>'+names.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join('');
   if(cur)s.value=cur;
 }
+// スコア変換マップ
+const SCORE_MAP = {
+  mood:  {よい:0, ふつう:1, しんどい:3},
+  sleepy:{ない:0, すこしある:1, かなりある:2},
+  body:  {ない:0, すこしある:2, つよい:3},
+  focus: {できそう:0, ふつう:1, むずかしい:2},
+  task:  {普段通りの作業:0, 軽い作業:1, わからない:2},
+};
+const FIELD_LABELS={score:'危険度スコア',mood:'気分',sleepy:'眠さ',body:'体のしんどさ',focus:'集中'};
+const FIELD_COLORS={score:'#6c8eff',mood:'#34d399',sleepy:'#fbbf24',body:'#f87171',focus:'#a78bfa'};
+const FIELD_MAX   ={score:12,mood:3,sleepy:2,body:3,focus:2};
+
+let _chartInstance=null;
+let _activeFields=new Set(['score']);
+let _reportData=[];
+
+function toNum(r,key){
+  if(key==='score') return calcScore(r);
+  return SCORE_MAP[key]?.[r[key]]??null;
+}
+
 async function renderReport(){
   const name=document.getElementById('report-name').value;
   const body=document.getElementById('report-body');
@@ -1070,12 +1109,24 @@ async function renderReport(){
   showLoading(false);
   const all=allRecs.filter(r=>r.name===name).sort((a,b)=>a.ts-b.ts);
   if(!all.length){body.innerHTML='<div class="empty">この利用者の記録がありません</div>';return;}
-  const good=all.filter(r=>r.mood==='よい').length,mid=all.filter(r=>r.mood==='ふつう').length,bad=all.filter(r=>r.mood==='しんどい').length;
+
+  const good=all.filter(r=>r.mood==='よい').length;
+  const mid =all.filter(r=>r.mood==='ふつう').length;
+  const bad =all.filter(r=>r.mood==='しんどい').length;
+
   const dayMap={};
-  all.forEach(r=>{const d=new Date(r.ts),k=d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();if(!dayMap[k]||dayMap[k].ts<r.ts)dayMap[k]=r;});
+  all.forEach(r=>{
+    const d=new Date(r.ts),k=d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();
+    if(!dayMap[k]||dayMap[k].ts<r.ts) dayMap[k]=r;
+  });
+  _reportData=Object.values(dayMap).sort((a,b)=>a.ts-b.ts);
+
   const firstDate=new Date(all[0].ts),lastDate=new Date(all[all.length-1].ts);
   const fmt=d=>d.toLocaleDateString('ja-JP',{year:'numeric',month:'long',day:'numeric'});
-  const months=[];let cur=new Date(firstDate.getFullYear(),firstDate.getMonth(),1);
+
+  // カレンダー
+  const months=[];
+  let cur=new Date(firstDate.getFullYear(),firstDate.getMonth(),1);
   const endM=new Date(lastDate.getFullYear(),lastDate.getMonth(),1);
   while(cur<=endM){months.push(new Date(cur));cur.setMonth(cur.getMonth()+1);}
   const today=new Date(),todayKey=today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
@@ -1093,6 +1144,14 @@ async function renderReport(){
     }
     calHtml+='</div></div>';
   });
+
+  // グラフ用トグルボタン
+  const toggles=Object.entries(FIELD_LABELS).map(([k,l])=>`
+    <button class="chart-toggle${_activeFields.has(k)?' on':''}" data-key="${k}"
+      onclick="toggleChartField('${k}')" style="${_activeFields.has(k)?'background:'+FIELD_COLORS[k]+';border-color:'+FIELD_COLORS[k]:''}">
+      ${l}
+    </button>`).join('');
+
   body.innerHTML=`
     <div class="rp-card fade-in">
       <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>${esc(name)} さんのレポート</h3>
@@ -1106,6 +1165,11 @@ async function renderReport(){
       </div>
     </div>
     <div class="rp-card fade-in">
+      <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>推移グラフ</h3>
+      <div class="chart-controls">${toggles}</div>
+      <div class="chart-wrap"><canvas id="trend-chart" height="260"></canvas></div>
+    </div>
+    <div class="rp-card fade-in">
       <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>出席カレンダー</h3>
       ${calHtml}
       <div class="legend">
@@ -1115,6 +1179,106 @@ async function renderReport(){
         <span class="leg"><span class="leg-dot" style="background:var(--surface2)"></span>記録なし</span>
       </div>
     </div>`;
+
+  // Chart.jsを動的ロード
+  if(!window.Chart){
+    await new Promise((res,rej)=>{
+      const s=document.createElement('script');
+      s.src='https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js';
+      s.onload=res;s.onerror=rej;
+      document.head.appendChild(s);
+    });
+  }
+  drawChart();
+}
+
+function drawChart(){
+  const canvas=document.getElementById('trend-chart');
+  if(!canvas||!_reportData.length) return;
+
+  if(_chartInstance){ _chartInstance.destroy(); _chartInstance=null; }
+
+  const isDark=!document.documentElement.dataset.theme;
+  const gridColor=isDark?'rgba(255,255,255,0.06)':'rgba(0,0,0,0.07)';
+  const textColor=isDark?'#7c82a3':'#6b7280';
+
+  const labels=_reportData.map(r=>{
+    const d=new Date(r.ts);
+    return (d.getMonth()+1)+'/'+(d.getDate());
+  });
+
+  const datasets=[..._activeFields].map(key=>({
+    label: FIELD_LABELS[key],
+    data: _reportData.map(r=>toNum(r,key)),
+    borderColor: FIELD_COLORS[key],
+    backgroundColor: FIELD_COLORS[key]+'22',
+    borderWidth: 2,
+    pointRadius: _reportData.length>60?2:4,
+    pointHoverRadius: 6,
+    tension: 0.35,
+    fill: false,
+    yAxisID: key==='score'?'yScore':'yItem',
+  }));
+
+  _chartInstance=new Chart(canvas,{
+    type:'line',
+    data:{labels,datasets},
+    options:{
+      responsive:true,
+      interaction:{mode:'index',intersect:false},
+      plugins:{
+        legend:{
+          labels:{color:textColor,font:{size:11},boxWidth:12,padding:12}
+        },
+        tooltip:{
+          backgroundColor:isDark?'#1a1d27':'#fff',
+          borderColor:isDark?'rgba(255,255,255,0.1)':'rgba(0,0,0,0.1)',
+          borderWidth:1,
+          titleColor:textColor,
+          bodyColor:isDark?'#f0f2ff':'#1a1d2e',
+          padding:10,
+        }
+      },
+      scales:{
+        x:{
+          ticks:{color:textColor,maxRotation:45,font:{size:10},maxTicksLimit:20},
+          grid:{color:gridColor}
+        },
+        yScore:{
+          type:'linear',position:'left',
+          min:0,max:12,
+          ticks:{color:FIELD_COLORS['score'],stepSize:3,font:{size:10}},
+          grid:{color:gridColor},
+          title:{display:true,text:'危険度(0-12)',color:FIELD_COLORS['score'],font:{size:10}},
+        },
+        yItem:{
+          type:'linear',position:'right',
+          min:0,max:3,
+          ticks:{color:textColor,stepSize:1,font:{size:10}},
+          grid:{drawOnChartArea:false},
+          title:{display:true,text:'各項目(0-3)',color:textColor,font:{size:10}},
+        }
+      }
+    }
+  });
+}
+
+function toggleChartField(key){
+  if(_activeFields.has(key)){
+    if(_activeFields.size===1) return; // 最低1つは残す
+    _activeFields.delete(key);
+  } else {
+    _activeFields.add(key);
+  }
+  // ボタン見た目を更新
+  document.querySelectorAll('.chart-toggle').forEach(btn=>{
+    const k=btn.dataset.key;
+    const on=_activeFields.has(k);
+    btn.classList.toggle('on',on);
+    btn.style.background=on?FIELD_COLORS[k]:'';
+    btn.style.borderColor=on?FIELD_COLORS[k]:'';
+  });
+  drawChart();
 }
 function printReport(){
   const name=document.getElementById('report-name').value;
