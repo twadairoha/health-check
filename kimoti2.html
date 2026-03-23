@@ -777,13 +777,13 @@ const saveCachedNames=n=>localStorage.setItem(LS_NAM,JSON.stringify(n));
 // ===== API通信 =====
 async function gasRequest(payload){
   if(!GAS_URL) throw new Error('GAS_URL未設定');
-  // GASはPOSTをリダイレクトするため redirect:follow が必要
-  const res = await fetch(GAS_URL, {
-    method:'POST',
-    redirect:'follow',
-    headers:{'Content-Type':'text/plain'},
-    body:JSON.stringify(payload)
+  // GETパラメータ経由で送信（CORS・405対策）
+  const params = new URLSearchParams({
+    action: payload.action,
+    data: JSON.stringify(payload)
   });
+  const url = GAS_URL + '?' + params.toString();
+  const res = await fetch(url, { method:'GET', redirect:'follow' });
   if(!res.ok) throw new Error('HTTP ' + res.status);
   const json = await res.json();
   if(json.error) throw new Error(json.error);
