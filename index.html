@@ -1293,15 +1293,21 @@ ${rows}
 
   try {
     if(!GAS_URL) throw new Error('GAS URLが設定されていません。⚙️ クラウド設定を確認してください。');
-    // AI分析はPOSTで送信（プロンプトが長いためJSONP不可）
-    const res = await fetch(GAS_URL, {
-      method:'POST',
-      redirect:'follow',
-      headers:{'Content-Type':'text/plain'},
-      body: JSON.stringify({action:'analyzeWithClaude', prompt})
+    // AI分析：プロンプトをGASにGETで送信（JSONP経由）
+    // 長いプロンプトはbase64エンコードして送信
+    const encoded = btoa(unescape(encodeURIComponent(prompt)));
+    const result = await new Promise((resolve, reject) => {
+      const cbName = 'aiCb_' + Date.now();
+      const timeout = setTimeout(()=>{ cleanup(); reject(new Error('タイムアウト（30秒）')); }, 30000);
+      function cleanup(){ clearTimeout(timeout); delete window[cbName]; const s=document.getElementById(cbName); if(s)s.remove(); }
+      window[cbName] = data => { cleanup(); resolve(data); };
+      const params = new URLSearchParams({ callback: cbName, action: 'analyzeWithClaude', promptB64: encoded });
+      const script = document.createElement('script');
+      script.id = cbName;
+      script.src = GAS_URL + '?' + params.toString();
+      script.onerror = ()=>{ cleanup(); reject(new Error('GASへの接続に失敗しました')); };
+      document.head.appendChild(script);
     });
-    if(!res.ok) throw new Error('HTTP '+res.status);
-    const result = await res.json();
     if(!result.text) throw new Error(result.error||'分析結果が空です');
     area.innerHTML=`
       <div class="ai-result">
@@ -1385,7 +1391,7 @@ function drawChart(){
         },
         yScore:{
           type:'linear',position:'left',
-          min:-6,max:6,
+          min:-8,max:8,
           ticks:{
             color:FIELD_COLORS['score'],font:{size:10},stepSize:2,
             callback:v=>v===0?'ふつう':v>0?'良好 +'+v:'注意 '+v
@@ -1395,7 +1401,7 @@ function drawChart(){
         },
         yItem:{
           type:'linear',position:'right',
-          min:-3,max:3,
+          min:-4,max:4,
           ticks:{
             color:textColor,font:{size:10},stepSize:1,
             callback:v=>v===0?'ふつう':v>0?'+'+v:''+v
