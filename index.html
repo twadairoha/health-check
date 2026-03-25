@@ -392,6 +392,49 @@ body{font-family:'DM Sans','Noto Sans JP',sans-serif;background:var(--bg);color:
 
 
 /* ===== 折れ線グラフ ===== */
+
+/* ===== AI分析 ===== */
+.ai-btn{
+  display:flex;align-items:center;gap:.5rem;
+  padding:.65rem 1.3rem;
+  background:linear-gradient(135deg,#6c8eff,#a78bfa);
+  color:#fff;border:none;border-radius:var(--radius-sm);
+  font-family:inherit;font-size:.88rem;font-weight:700;
+  cursor:pointer;transition:opacity .2s;margin-top:.8rem;
+}
+.ai-btn:hover{opacity:.85;}
+.ai-btn:disabled{opacity:.5;cursor:not-allowed;}
+.ai-btn svg{width:15px;height:15px;}
+
+.ai-result{
+  margin-top:1rem;
+  padding:1.1rem 1.3rem;
+  background:var(--surface2);
+  border:1.5px solid var(--primary-glow);
+  border-radius:var(--radius-sm);
+  font-size:.88rem;line-height:1.85;color:var(--text);
+  white-space:pre-wrap;
+  animation:fadeUp .4s ease;
+}
+.ai-result .ai-label{
+  font-size:.68rem;font-weight:700;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--primary);
+  margin-bottom:.6rem;display:flex;align-items:center;gap:.4rem;
+}
+.ai-result .ai-label svg{width:12px;height:12px;}
+.ai-thinking{
+  display:flex;align-items:center;gap:.6rem;
+  color:var(--muted);font-size:.85rem;margin-top:.8rem;
+}
+.ai-thinking .dots span{
+  display:inline-block;width:6px;height:6px;border-radius:50%;
+  background:var(--primary);margin:0 2px;
+  animation:dotBounce 1.2s infinite ease-in-out;
+}
+.ai-thinking .dots span:nth-child(2){animation-delay:.2s;}
+.ai-thinking .dots span:nth-child(3){animation-delay:.4s;}
+@keyframes dotBounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-6px)}}
+
 .chart-controls{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:1rem;align-items:center;}
 .chart-toggle{
   padding:.35rem .8rem;border:1.5px solid var(--border);border-radius:999px;
@@ -1168,6 +1211,11 @@ async function renderReport(){
       <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>推移グラフ</h3>
       <div class="chart-controls">${toggles}</div>
       <div class="chart-wrap"><canvas id="trend-chart" height="260"></canvas></div>
+      <button class="ai-btn" onclick="runAiAnalysis('${name}')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 6v6l4 2"/><circle cx="18" cy="6" r="3" fill="currentColor" stroke="none"/></svg>
+        AI分析
+      </button>
+      <div id="ai-result-area"></div>
     </div>
     <div class="rp-card fade-in">
       <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>出席カレンダー</h3>
@@ -1190,6 +1238,55 @@ async function renderReport(){
     });
   }
   drawChart();
+}
+
+
+// ===== AI分析 =====
+async function runAiAnalysis(name){
+  const btn = document.querySelector('.ai-btn');
+  const area = document.getElementById('ai-result-area');
+  if(!btn||!area) return;
+
+  btn.disabled=true;
+  area.innerHTML=`<div class="ai-thinking"><span>分析中</span><div class="dots"><span></span><span></span><span></span></div></div>`;
+
+  // データをテキスト化
+  const rows = _reportData.map(r=>{
+    const d=new Date(r.ts);
+    const dateStr=(d.getMonth()+1)+'月'+d.getDate()+'日';
+    return `${dateStr}: 危険度${calcScore(r)}点 気分=${r.mood} 眠さ=${r.sleepy} 体=${r.body} 集中=${r.focus} 作業=${r.task}${r.memo?(' メモ:'+r.memo):''}`;
+  }).join('\n');
+
+  const prompt = `あなたは福祉施設の支援スタッフをサポートするAIアシスタントです。
+以下は「${name}」さんの体調・気分の記録データです（日別、新しい順）。
+
+${rows}
+
+危険度スコアは0〜12点で、高いほど注意が必要です（8点以上は要対応）。
+各項目のスコア換算：気分(よい=0,ふつう=1,しんどい=3)、眠さ(ない=0,すこし=1,かなり=2)、体(ない=0,すこし=2,つよい=3)、集中(できそう=0,ふつう=1,むずかしい=2)、作業(普段通り=0,軽い=1,わからない=2)
+
+以下の2点を日本語で分析してください：
+1. 【傾向・パターン】グラフ全体の傾向、繰り返しのパターン、変化の特徴
+2. 【注目ポイント】職員が特に気をつけるべき点、異常値、急激な変化など
+
+簡潔に、箇条書きを使わず自然な文章で、3〜5文程度でまとめてください。`;
+
+  try {
+    if(!GAS_URL) throw new Error('GAS URLが設定されていません。⚙️ クラウド設定を確認してください。');
+    const result = await gasRequest({action:'analyzeWithClaude', prompt});
+    if(!result.text) throw new Error(result.error||'分析結果が空です');
+    area.innerHTML=`
+      <div class="ai-result">
+        <div class="ai-label">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10"/><path d="M12 6v6l4 2"/><circle cx="18" cy="6" r="3" fill="currentColor" stroke="none"/></svg>
+          AI分析結果
+        </div>
+        ${esc(result.text)}
+      </div>`;
+  } catch(e) {
+    area.innerHTML=`<div class="ai-result" style="border-color:var(--bad-bg);color:var(--bad)">分析に失敗しました: ${esc(e.message)}</div>`;
+  }
+  btn.disabled=false;
 }
 
 function drawChart(){
