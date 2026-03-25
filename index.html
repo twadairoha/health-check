@@ -1273,7 +1273,15 @@ ${rows}
 
   try {
     if(!GAS_URL) throw new Error('GAS URLが設定されていません。⚙️ クラウド設定を確認してください。');
-    const result = await gasRequest({action:'analyzeWithClaude', prompt});
+    // AI分析はPOSTで送信（プロンプトが長いためJSONP不可）
+    const res = await fetch(GAS_URL, {
+      method:'POST',
+      redirect:'follow',
+      headers:{'Content-Type':'text/plain'},
+      body: JSON.stringify({action:'analyzeWithClaude', prompt})
+    });
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const result = await res.json();
     if(!result.text) throw new Error(result.error||'分析結果が空です');
     area.innerHTML=`
       <div class="ai-result">
