@@ -1132,15 +1132,35 @@ const SCORE_MAP = {
 };
 const FIELD_LABELS={score:'危険度スコア',mood:'気分',sleepy:'眠さ',body:'体のしんどさ',focus:'集中'};
 const FIELD_COLORS={score:'#6c8eff',mood:'#34d399',sleepy:'#fbbf24',body:'#f87171',focus:'#a78bfa'};
-const FIELD_MAX   ={score:12,mood:3,sleepy:2,body:3,focus:2};
 
 let _chartInstance=null;
 let _activeFields=new Set(['score']);
 let _reportData=[];
 
-function toNum(r,key){
-  if(key==='score') return calcScore(r);
-  return SCORE_MAP[key]?.[r[key]]??null;
+// 各項目を「ふつう=0、よい方向=+、しんどい方向=−」に変換
+function toNum(r, key){
+  if(key==='score'){
+    // 危険度スコアは反転（低いほど上、高いほど下）して中心を基準に
+    // 0〜12点 → +6〜−6（6点=ふつう=0）
+    return 6 - calcScore(r);
+  }
+  // 気分: よい=+2, ふつう=0, しんどい=−2
+  if(key==='mood'){
+    return r.mood==='よい'?2 : r.mood==='ふつう'?0 : -2;
+  }
+  // 眠さ: ない=+2, すこしある=0, かなりある=−2
+  if(key==='sleepy'){
+    return r.sleepy==='ない'?2 : r.sleepy==='すこしある'?0 : -2;
+  }
+  // 体のしんどさ: ない=+2, すこしある=0, つよい=−2
+  if(key==='body'){
+    return r.body==='ない'?2 : r.body==='すこしある'?0 : -2;
+  }
+  // 集中: できそう=+2, ふつう=0, むずかしい=−2
+  if(key==='focus'){
+    return r.focus==='できそう'?2 : r.focus==='ふつう'?0 : -2;
+  }
+  return null;
 }
 
 async function renderReport(){
@@ -1325,6 +1345,20 @@ function drawChart(){
     yAxisID: key==='score'?'yScore':'yItem',
   }));
 
+  // ゼロライン用データセット（ふつう基準線）
+  datasets.unshift({
+    label:'ふつう（基準）',
+    data: _reportData.map(()=>0),
+    borderColor: isDark?'rgba(255,255,255,0.15)':'rgba(0,0,0,0.12)',
+    borderWidth:1,
+    borderDash:[4,4],
+    pointRadius:0,
+    fill:false,
+    tension:0,
+    yAxisID:'yScore',
+    order:10,
+  });
+
   _chartInstance=new Chart(canvas,{
     type:'line',
     data:{labels,datasets},
@@ -1351,17 +1385,23 @@ function drawChart(){
         },
         yScore:{
           type:'linear',position:'left',
-          min:0,max:12,
-          ticks:{color:FIELD_COLORS['score'],stepSize:3,font:{size:10}},
+          min:-6,max:6,
+          ticks:{
+            color:FIELD_COLORS['score'],font:{size:10},stepSize:2,
+            callback:v=>v===0?'ふつう':v>0?'良好 +'+v:'注意 '+v
+          },
           grid:{color:gridColor},
-          title:{display:true,text:'危険度(0-12)',color:FIELD_COLORS['score'],font:{size:10}},
+          title:{display:true,text:'危険度（上が良好）',color:FIELD_COLORS['score'],font:{size:10}},
         },
         yItem:{
           type:'linear',position:'right',
-          min:0,max:3,
-          ticks:{color:textColor,stepSize:1,font:{size:10}},
+          min:-3,max:3,
+          ticks:{
+            color:textColor,font:{size:10},stepSize:1,
+            callback:v=>v===0?'ふつう':v>0?'+'+v:''+v
+          },
           grid:{drawOnChartArea:false},
-          title:{display:true,text:'各項目(0-3)',color:textColor,font:{size:10}},
+          title:{display:true,text:'各項目（上が良好）',color:textColor,font:{size:10}},
         }
       }
     }
