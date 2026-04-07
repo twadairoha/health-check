@@ -751,21 +751,41 @@ const saveCachedRecords=r=>localStorage.setItem(LS_REC,JSON.stringify(r));
 const getCachedNames=()=>JSON.parse(localStorage.getItem(LS_NAM)||'[]');
 const saveCachedNames=n=>localStorage.setItem(LS_NAM,JSON.stringify(n));
 
-// ===== API通信（fetch + no-cors対応版） =====
-// GASはCORSヘッダーを返すのでfetchで直接通信できる
-async function gasRequest(payload) {
+// ===== API通信（JSONP方式・CORSを完全回避） =====
+function gasRequest(payload) {
   if (!GAS_URL) return Promise.reject(new Error('GAS_URL未設定'));
-  const url = new URL(GAS_URL);
-  url.searchParams.set('action', payload.action);
-  url.searchParams.set('data', JSON.stringify(payload));
-  const res = await fetch(url.toString(), {
-    method: 'GET',
-    redirect: 'follow',
+  return new Promise((resolve, reject) => {
+    const cbName = 'gasCb_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
+    const timeout = setTimeout(() => {
+      cleanup();
+      reject(new Error('タイムアウト（15秒）'));
+    }, 15000);
+
+    function cleanup() {
+      clearTimeout(timeout);
+      delete window[cbName];
+      const s = document.getElementById(cbName);
+      if (s) s.remove();
+    }
+
+    window[cbName] = function(data) {
+      cleanup();
+      if (data.error) reject(new Error(data.error));
+      else resolve(data);
+    };
+
+    const params = new URLSearchParams({
+      callback: cbName,
+      action: payload.action,
+      data: JSON.stringify(payload)
+    });
+
+    const script = document.createElement('script');
+    script.id = cbName;
+    script.src = GAS_URL + '?' + params.toString();
+    script.onerror = () => { cleanup(); reject(new Error('通信失敗（GAS URLを確認してください）')); };
+    document.head.appendChild(script);
   });
-  if (!res.ok) throw new Error('HTTP ' + res.status);
-  const data = await res.json();
-  if (data.error) throw new Error(data.error);
-  return data;
 }
 
 // ===== Records =====
