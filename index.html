@@ -1126,7 +1126,7 @@ function switchTab(id,btn){
   document.querySelectorAll('.staff-tab').forEach(t=>t.classList.remove('active'));
   document.getElementById('tab-'+id).classList.add('active');
   btn.classList.add('active');
-  if(id==='report') renderReport();
+  if(id==='report'){ populateReportSelect(); renderReport(); }
 }
 
 // ===== フィルター・ソート =====
