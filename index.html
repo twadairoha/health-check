@@ -1263,7 +1263,9 @@ function renderReport(){
   // カレンダー生成
   const byDate={};
   recs.forEach(r=>{
-    const d=r.time.split(' ')[0];
+    if(!r.time) return;
+    const d=String(r.time).split(' ')[0];
+    if(!d || d.length < 7) return;
     if(!byDate[d]||calcScore(r)>calcScore(byDate[d])) byDate[d]=r;
   });
   const months={};
@@ -1282,7 +1284,7 @@ function renderReport(){
     const todayStr=`${today.getFullYear()}/${String(today.getMonth()+1).padStart(2,'0')}/${String(today.getDate()).padStart(2,'0')}`;
     calHtml+=`<div class="cal-month"><div class="cal-month-lbl">${ym}</div>
       <div class="cal-grid">${days.map(d=>`<div class="cal-hd">${d}</div>`).join('')}
-      ${Array(first).fill('<div class="cal-cell emp"></div>').join('')}
+      ${Array.from({length:Math.max(0,first)},()=>'<div class="cal-cell emp"></div>').join('')}
       ${Array.from({length:last},(_,i)=>{
         const day=String(i+1).padStart(2,'0');
         const ds=`${y}/${String(m).padStart(2,'0')}/${day}`;
