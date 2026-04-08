@@ -1113,6 +1113,8 @@ async function syncFromGas(){
     renderRecords();
     renderNameList();
     renderNameGrid();
+    populateReportSelect();
+    renderReport();
     showToast('同期完了しました');
   } catch(e){
     showToast('同期失敗: '+e.message);
