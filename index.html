@@ -910,8 +910,11 @@ function pickName(btn,name){
   selName=name;
   document.getElementById('snb-name-text').textContent=name;
   document.getElementById('selected-name-bar').classList.add('visible');
-  // ★追加：名前を選んだら5秒タイマー開始
-  startAutoReturn();
+  // 最初の質問へスクロール
+  setTimeout(()=>{
+    const firstQ=document.querySelector('.q-section');
+    if(firstQ) firstQ.scrollIntoView({behavior:'smooth',block:'center'});
+  }, 100);
 }
 
 function clearNameSelection(){
@@ -925,11 +928,22 @@ function clearNameSelection(){
 document.querySelectorAll('.choice-grid').forEach(grid=>{
   grid.querySelectorAll('.choice-btn').forEach(btn=>{
     btn.addEventListener('click',()=>{
-      stopAutoReturn(); // ★追加：質問を選んだらタイマー停止
       grid.querySelectorAll('.choice-btn').forEach(b=>b.classList.remove('sel-good','sel-mid','sel-bad','sel-blue'));
       btn.classList.add(btn.dataset.sel);
       sel[grid.dataset.field]=btn.dataset.value;
       buildLiveVisual();
+      // 次のq-sectionへ自動スクロール
+      setTimeout(()=>{
+        const sections=Array.from(document.querySelectorAll('.q-section'));
+        const cur=grid.closest('.q-section');
+        const idx=sections.indexOf(cur);
+        if(idx>=0 && idx<sections.length-1){
+          sections[idx+1].scrollIntoView({behavior:'smooth',block:'center'});
+        } else if(idx===sections.length-1){
+          // 最後の質問（メモ）の次は送信ボタンへ
+          document.querySelector('.submit-btn').scrollIntoView({behavior:'smooth',block:'center'});
+        }
+      }, 200);
     });
   });
 });
@@ -954,6 +968,8 @@ async function submitRecord(){
   document.getElementById('thankyou').style.gridColumn='1 / -1';
   buildStateVisual(lastRecord);
   window.scrollTo({top:0,behavior:'smooth'});
+  // ★完了画面で5秒タイマー開始
+  startAutoReturn();
 }
 
 function resetForm(){
