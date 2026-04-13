@@ -453,6 +453,82 @@ body{font-family:'DM Sans','Noto Sans JP',sans-serif;background:var(--bg);color:
   .cal-cell.cb{background:#fadbd8;color:#c0392b;}
   .cal-cell.no-r{background:#f0f0f0;color:#aaa;}
 }
+
+/* ===== ステップ式フォーム ===== */
+.step-wrap {
+  position: relative;
+  overflow: hidden;
+}
+.step-slide {
+  display: none;
+  animation: stepSlideIn .3s ease;
+}
+.step-slide.active {
+  display: block;
+}
+@keyframes stepSlideIn {
+  from { opacity: 0; transform: translateX(24px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.step-progress-bar {
+  display: flex;
+  gap: .35rem;
+  margin-bottom: 1.5rem;
+  align-items: center;
+}
+.step-pip {
+  height: 4px;
+  flex: 1;
+  border-radius: 999px;
+  background: var(--border);
+  transition: background .3s;
+}
+.step-pip.done { background: var(--good); }
+.step-pip.active { background: var(--primary); }
+.step-label {
+  font-size: .7rem;
+  font-weight: 700;
+  color: var(--muted);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+}
+.step-back-row {
+  margin-top: .8rem;
+  display: flex;
+  gap: .6rem;
+  align-items: center;
+}
+.step-back-btn {
+  display: flex;
+  align-items: center;
+  gap: .3rem;
+  padding: .4rem .9rem;
+  border: 1.5px solid var(--border);
+  border-radius: 999px;
+  background: transparent;
+  font-family: inherit;
+  font-size: .78rem;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all .15s;
+}
+.step-back-btn:hover { border-color: var(--primary); color: var(--primary); }
+.memo-skip-btn {
+  align-self: flex-end;
+  padding: .4rem 1rem;
+  border: 1.5px solid var(--border);
+  border-radius: 999px;
+  background: transparent;
+  font-family: inherit;
+  font-size: .78rem;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all .15s;
+}
+.memo-skip-btn:hover { border-color: var(--primary); color: var(--primary); }
 </style>
 </head>
 <body>
@@ -510,127 +586,138 @@ body{font-family:'DM Sans','Noto Sans JP',sans-serif;background:var(--bg);color:
     </div><!-- /user-left -->
 
     <div class="user-right">
-    <!-- 気分 -->
-    <div class="q-section">
-      <div class="q-label">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
-        今の気分は？
-      </div>
-      <div class="choice-grid col3" data-field="mood">
-        <button class="choice-btn" data-value="よい" data-sel="sel-good">
-          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 13s1.5 3 4 3 4-3 4-3"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></div>
-          <span class="c-label">よい</span>
-        </button>
-        <button class="choice-btn" data-value="ふつう" data-sel="sel-mid">
-          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></div>
-          <span class="c-label">ふつう</span>
-        </button>
-        <button class="choice-btn" data-value="しんどい" data-sel="sel-bad">
-          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 16s-1.5-3-4-3-4 3-4 3"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></div>
-          <span class="c-label">しんどい</span>
-        </button>
-      </div>
-    </div>
+    <div class="step-wrap" id="step-wrap">
 
-    <!-- 眠さ -->
-    <div class="q-section">
-      <div class="q-label">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-        眠さは？
+      <!-- プログレスバー -->
+      <div class="step-progress-bar" id="step-progress-bar">
+        <div class="step-pip active" id="pip-0"></div>
+        <div class="step-pip" id="pip-1"></div>
+        <div class="step-pip" id="pip-2"></div>
+        <div class="step-pip" id="pip-3"></div>
+        <div class="step-pip" id="pip-4"></div>
+        <div class="step-pip" id="pip-5"></div>
       </div>
-      <div class="choice-grid col3" data-field="sleepy">
-        <button class="choice-btn" data-value="ない" data-sel="sel-good">
-          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10A15.3 15.3 0 0 1 12 2z"/></svg></div>
-          <span class="c-label">ない</span>
-        </button>
-        <button class="choice-btn" data-value="すこしある" data-sel="sel-mid">
-          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 18a5 5 0 0 0-10 0"/><line x1="12" y1="2" x2="12" y2="9"/><line x1="4.22" y1="10.22" x2="5.64" y2="11.64"/><line x1="2" y1="18" x2="4" y2="18"/><line x1="20" y1="18" x2="22" y2="18"/><line x1="18.36" y1="11.64" x2="19.78" y2="10.22"/></svg></div>
-          <span class="c-label">すこしある</span>
-        </button>
-        <button class="choice-btn" data-value="かなりある" data-sel="sel-bad">
-          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/><path d="M14 10l2 2-2 2"/><path d="M10 10l-2 2 2 2"/></svg></div>
-          <span class="c-label">かなりある</span>
-        </button>
-      </div>
-    </div>
 
-    <!-- 体のしんどさ -->
-    <div class="q-section">
-      <div class="q-label">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-        体のしんどさは？
+      <!-- Step 0: 気分 -->
+      <div class="step-slide active" id="slide-0">
+        <div class="step-label">1 / 6 &nbsp;—&nbsp; 今の気分は？</div>
+        <div class="choice-grid col3" data-field="mood">
+          <button class="choice-btn" data-value="よい" data-sel="sel-good" onclick="stepNext(this,'mood',1)">
+            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 13s1.5 3 4 3 4-3 4-3"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></div>
+            <span class="c-label">よい</span>
+          </button>
+          <button class="choice-btn" data-value="ふつう" data-sel="sel-mid" onclick="stepNext(this,'mood',1)">
+            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></div>
+            <span class="c-label">ふつう</span>
+          </button>
+          <button class="choice-btn" data-value="しんどい" data-sel="sel-bad" onclick="stepNext(this,'mood',1)">
+            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 16s-1.5-3-4-3-4 3-4 3"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></div>
+            <span class="c-label">しんどい</span>
+          </button>
+        </div>
       </div>
-      <div class="choice-grid col3" data-field="body">
-        <button class="choice-btn" data-value="ない" data-sel="sel-good">
-          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
-          <span class="c-label">ない</span>
-        </button>
-        <button class="choice-btn" data-value="すこしある" data-sel="sel-mid">
-          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
-          <span class="c-label">すこしある</span>
-        </button>
-        <button class="choice-btn" data-value="つよい" data-sel="sel-bad">
-          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
-          <span class="c-label">つよい</span>
-        </button>
-      </div>
-    </div>
 
-    <!-- 集中 -->
-    <div class="q-section">
-      <div class="q-label">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
-        集中できそう？
+      <!-- Step 1: 眠さ -->
+      <div class="step-slide" id="slide-1">
+        <div class="step-label">2 / 6 &nbsp;—&nbsp; 眠さは？</div>
+        <div class="choice-grid col3" data-field="sleepy">
+          <button class="choice-btn" data-value="ない" data-sel="sel-good" onclick="stepNext(this,'sleepy',2)">
+            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10A15.3 15.3 0 0 1 12 2z"/></svg></div>
+            <span class="c-label">ない</span>
+          </button>
+          <button class="choice-btn" data-value="すこしある" data-sel="sel-mid" onclick="stepNext(this,'sleepy',2)">
+            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 18a5 5 0 0 0-10 0"/><line x1="12" y1="2" x2="12" y2="9"/><line x1="4.22" y1="10.22" x2="5.64" y2="11.64"/><line x1="2" y1="18" x2="4" y2="18"/><line x1="20" y1="18" x2="22" y2="18"/><line x1="18.36" y1="11.64" x2="19.78" y2="10.22"/></svg></div>
+            <span class="c-label">すこしある</span>
+          </button>
+          <button class="choice-btn" data-value="かなりある" data-sel="sel-bad" onclick="stepNext(this,'sleepy',2)">
+            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/><path d="M14 10l2 2-2 2"/><path d="M10 10l-2 2 2 2"/></svg></div>
+            <span class="c-label">かなりある</span>
+          </button>
+        </div>
+        <div class="step-back-row">
+          <button class="step-back-btn" onclick="stepGo(0)">← もどる</button>
+        </div>
       </div>
-      <div class="choice-grid col3" data-field="focus">
-        <button class="choice-btn" data-value="できそう" data-sel="sel-good">
-          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
-          <span class="c-label">できそう</span>
-        </button>
-        <button class="choice-btn" data-value="ふつう" data-sel="sel-mid">
-          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></div>
-          <span class="c-label">ふつう</span>
-        </button>
-        <button class="choice-btn" data-value="むずかしい" data-sel="sel-bad">
-          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
-          <span class="c-label">むずかしい</span>
-        </button>
-      </div>
-    </div>
 
-    <!-- 作業量 -->
-    <div class="q-section">
-      <div class="q-label">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-        今日やれそうなこと
+      <!-- Step 2: 体のしんどさ -->
+      <div class="step-slide" id="slide-2">
+        <div class="step-label">3 / 6 &nbsp;—&nbsp; 体のしんどさは？</div>
+        <div class="choice-grid col3" data-field="body">
+          <button class="choice-btn" data-value="ない" data-sel="sel-good" onclick="stepNext(this,'body',3)">
+            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <span class="c-label">ない</span>
+          </button>
+          <button class="choice-btn" data-value="すこしある" data-sel="sel-mid" onclick="stepNext(this,'body',3)">
+            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+            <span class="c-label">すこしある</span>
+          </button>
+          <button class="choice-btn" data-value="つよい" data-sel="sel-bad" onclick="stepNext(this,'body',3)">
+            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+            <span class="c-label">つよい</span>
+          </button>
+        </div>
+        <div class="step-back-row">
+          <button class="step-back-btn" onclick="stepGo(1)">← もどる</button>
+        </div>
       </div>
-      <div class="choice-grid col3" data-field="task">
-        <button class="choice-btn" data-value="軽い作業" data-sel="sel-good">
-          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
-          <span class="c-label">軽い作業</span>
-        </button>
-        <button class="choice-btn" data-value="普段通りの作業" data-sel="sel-blue">
-          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M5.34 18.66l-1.41 1.41M3 12H1m22 0h-2M5.34 5.34 3.93 3.93M18.66 18.66l1.41 1.41M12 21v2M12 1v2"/></svg></div>
-          <span class="c-label">普段通り</span>
-        </button>
-        <button class="choice-btn" data-value="わからない" data-sel="sel-mid">
-          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
-          <span class="c-label">わからない</span>
-        </button>
-      </div>
-    </div>
 
-    <!-- メモ -->
-    <div class="q-section">
-      <div class="q-label">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-        一言メモ
-        <span style="font-size:.72rem;color:var(--muted);font-weight:400">（任意）</span>
+      <!-- Step 3: 集中 -->
+      <div class="step-slide" id="slide-3">
+        <div class="step-label">4 / 6 &nbsp;—&nbsp; 集中できそう？</div>
+        <div class="choice-grid col3" data-field="focus">
+          <button class="choice-btn" data-value="できそう" data-sel="sel-good" onclick="stepNext(this,'focus',4)">
+            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+            <span class="c-label">できそう</span>
+          </button>
+          <button class="choice-btn" data-value="ふつう" data-sel="sel-mid" onclick="stepNext(this,'focus',4)">
+            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></div>
+            <span class="c-label">ふつう</span>
+          </button>
+          <button class="choice-btn" data-value="むずかしい" data-sel="sel-bad" onclick="stepNext(this,'focus',4)">
+            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+            <span class="c-label">むずかしい</span>
+          </button>
+        </div>
+        <div class="step-back-row">
+          <button class="step-back-btn" onclick="stepGo(2)">← もどる</button>
+        </div>
       </div>
-      <textarea class="memo-area" id="memo" placeholder="なんでも…"></textarea>
-    </div>
 
-    <button class="submit-btn" onclick="submitRecord()">記録する</button>
+      <!-- Step 4: 作業量 -->
+      <div class="step-slide" id="slide-4">
+        <div class="step-label">5 / 6 &nbsp;—&nbsp; 今日やれそうなこと</div>
+        <div class="choice-grid col3" data-field="task">
+          <button class="choice-btn" data-value="軽い作業" data-sel="sel-good" onclick="stepNext(this,'task',5)">
+            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
+            <span class="c-label">軽い作業</span>
+          </button>
+          <button class="choice-btn" data-value="普段通りの作業" data-sel="sel-blue" onclick="stepNext(this,'task',5)">
+            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M5.34 18.66l-1.41 1.41M3 12H1m22 0h-2M5.34 5.34 3.93 3.93M18.66 18.66l1.41 1.41M12 21v2M12 1v2"/></svg></div>
+            <span class="c-label">普段通り</span>
+          </button>
+          <button class="choice-btn" data-value="わからない" data-sel="sel-mid" onclick="stepNext(this,'task',5)">
+            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+            <span class="c-label">わからない</span>
+          </button>
+        </div>
+        <div class="step-back-row">
+          <button class="step-back-btn" onclick="stepGo(3)">← もどる</button>
+        </div>
+      </div>
+
+      <!-- Step 5: メモ -->
+      <div class="step-slide" id="slide-5">
+        <div class="step-label">6 / 6 &nbsp;—&nbsp; 一言メモ（任意）</div>
+        <textarea class="memo-area" id="memo" placeholder="なんでも…" rows="4"></textarea>
+        <div class="step-back-row">
+          <button class="step-back-btn" onclick="stepGo(4)">← もどる</button>
+          <button class="memo-skip-btn" onclick="skipMemo()">スキップ →</button>
+        </div>
+        <button class="submit-btn" style="margin-top:1rem;" onclick="submitRecord()">記録する</button>
+      </div>
+
+    </div><!-- /step-wrap -->
+
     <div class="staff-link-wrap">
       <button class="staff-link" onclick="goStaff()">職員用ページへ</button>
     </div>
@@ -910,10 +997,10 @@ function pickName(btn,name){
   selName=name;
   document.getElementById('snb-name-text').textContent=name;
   document.getElementById('selected-name-bar').classList.add('visible');
-  // 最初の質問へスクロール
+  // ステップを最初にリセットしてスクロール
+  resetSteps();
   setTimeout(()=>{
-    const firstQ=document.querySelector('.q-section');
-    if(firstQ) firstQ.scrollIntoView({behavior:'smooth',block:'center'});
+    document.getElementById('step-wrap').scrollIntoView({behavior:'smooth', block:'start'});
   }, 100);
 }
 
@@ -925,28 +1012,57 @@ function clearNameSelection(){
   stopAutoReturn(); // ★追加：タイマー停止
 }
 
-document.querySelectorAll('.choice-grid').forEach(grid=>{
-  grid.querySelectorAll('.choice-btn').forEach(btn=>{
-    btn.addEventListener('click',()=>{
-      grid.querySelectorAll('.choice-btn').forEach(b=>b.classList.remove('sel-good','sel-mid','sel-bad','sel-blue'));
-      btn.classList.add(btn.dataset.sel);
-      sel[grid.dataset.field]=btn.dataset.value;
-      buildLiveVisual();
-      // 次のq-sectionへ自動スクロール
-      setTimeout(()=>{
-        const sections=Array.from(document.querySelectorAll('.q-section'));
-        const cur=grid.closest('.q-section');
-        const idx=sections.indexOf(cur);
-        if(idx>=0 && idx<sections.length-1){
-          sections[idx+1].scrollIntoView({behavior:'smooth',block:'center'});
-        } else if(idx===sections.length-1){
-          // 最後の質問（メモ）の次は送信ボタンへ
-          document.querySelector('.submit-btn').scrollIntoView({behavior:'smooth',block:'center'});
-        }
-      }, 200);
-    });
+// ===== ステップ式フォーム制御 =====
+let currentStep = 0;
+const TOTAL_STEPS = 6;
+
+function stepGo(n) {
+  // 現在のスライドを非表示
+  document.getElementById('slide-' + currentStep).classList.remove('active');
+  // 指定スライドを表示
+  currentStep = n;
+  document.getElementById('slide-' + currentStep).classList.add('active');
+  // プログレスバー更新
+  for(let i = 0; i < TOTAL_STEPS; i++) {
+    const pip = document.getElementById('pip-' + i);
+    pip.classList.remove('active', 'done');
+    if(i < currentStep) pip.classList.add('done');
+    else if(i === currentStep) pip.classList.add('active');
+  }
+  // 上部へスクロール
+  document.getElementById('step-wrap').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+function stepNext(btn, field, nextStep) {
+  // ボタンの選択状態を更新
+  const grid = btn.closest('.choice-grid');
+  grid.querySelectorAll('.choice-btn').forEach(b => b.classList.remove('sel-good','sel-mid','sel-bad','sel-blue'));
+  btn.classList.add(btn.dataset.sel);
+  sel[field] = btn.dataset.value;
+  buildLiveVisual();
+  // 少し待ってから次のステップへ
+  setTimeout(() => stepGo(nextStep), 220);
+}
+
+function skipMemo() {
+  document.getElementById('memo').value = '';
+  submitRecord();
+}
+
+function resetSteps() {
+  currentStep = 0;
+  document.querySelectorAll('.step-slide').forEach((s, i) => {
+    s.classList.toggle('active', i === 0);
   });
-});
+  for(let i = 0; i < TOTAL_STEPS; i++) {
+    const pip = document.getElementById('pip-' + i);
+    pip.classList.remove('active', 'done');
+    if(i === 0) pip.classList.add('active');
+  }
+  document.querySelectorAll('.choice-btn').forEach(b => {
+    b.classList.remove('sel-good','sel-mid','sel-bad','sel-blue');
+  });
+}
 
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
 
@@ -981,6 +1097,7 @@ function resetForm(){
   document.getElementById('thankyou').style.display='none';
   document.getElementById('form-area').style.display='contents';
   document.getElementById('selected-name-bar').classList.remove('visible');
+  resetSteps();
   buildLiveVisual();
   renderNameGrid();window.scrollTo({top:0,behavior:'smooth'});
 }
