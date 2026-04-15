@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>体調・気分きろく</title>
+<title>今日はどうする？</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -454,6 +454,34 @@ body{font-family:'DM Sans','Noto Sans JP',sans-serif;background:var(--bg);color:
   .cal-cell.no-r{background:#f0f0f0;color:#aaa;}
 }
 
+/* ===== 絵文字アイコン ===== */
+.ic-emoji {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto .3rem;
+}
+.ic-emoji svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+/* ===== 視認性向上 ===== */
+.step-label {
+  font-size: .9rem !important;
+  font-weight: 800 !important;
+  letter-spacing: .06em !important;
+}
+.c-label {
+  font-size: 1.05rem !important;
+  font-weight: 700 !important;
+}
+.choice-btn {
+  padding: .8rem .5rem .7rem !important;
+  gap: .45rem !important;
+}
 /* ===== ステップ式フォーム ===== */
 .step-wrap {
   position: relative;
@@ -569,8 +597,8 @@ body{font-family:'DM Sans','Noto Sans JP',sans-serif;background:var(--bg);color:
       <div class="logo-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a9 9 0 0 1 9 9c0 4.97-4.03 9-9 9S3 15.97 3 11A9 9 0 0 1 12 2z"/><path d="M12 6v6l4 2"/></svg>
       </div>
-      <h1>今日の体調・気分</h1>
-      <p>選んで送るだけ、1分でできます</p>
+      <h1>今日はどうする？</h1>
+      <p>自分のペースを決めよう。1分でできます</p>
     </div>
 
     <div class="q-section">
@@ -594,44 +622,98 @@ body{font-family:'DM Sans','Noto Sans JP',sans-serif;background:var(--bg);color:
         <div class="step-pip" id="pip-1"></div>
         <div class="step-pip" id="pip-2"></div>
         <div class="step-pip" id="pip-3"></div>
-        <div class="step-pip" id="pip-4"></div>
-        <div class="step-pip" id="pip-5"></div>
       </div>
 
       <!-- Step 0: 気分 -->
       <div class="step-slide active" id="slide-0">
-        <div class="step-label">1 / 6 &nbsp;—&nbsp; 今の気分は？</div>
+        <div class="step-label">1 / 3 &nbsp;—&nbsp; 今の気分は？</div>
         <div class="choice-grid col3" data-field="mood">
           <button class="choice-btn" data-value="よい" data-sel="sel-good" onclick="stepNext(this,'mood',1)">
-            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 13s1.5 3 4 3 4-3 4-3"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></div>
+            <div class="ic-emoji">
+              <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="24" cy="24" r="18" stroke="var(--good)" stroke-width="2" fill="var(--good-bg)"/>
+                <path d="M16 27 Q24 34 32 27" stroke="var(--good)" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+                <circle cx="18" cy="20" r="2" fill="var(--good)"/>
+                <circle cx="30" cy="20" r="2" fill="var(--good)"/>
+                <line x1="24" y1="3" x2="24" y2="7" stroke="var(--good)" stroke-width="2" stroke-linecap="round"/>
+                <line x1="38" y1="10" x2="35.5" y2="12.5" stroke="var(--good)" stroke-width="2" stroke-linecap="round"/>
+                <line x1="10" y1="10" x2="12.5" y2="12.5" stroke="var(--good)" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </div>
             <span class="c-label">よい</span>
           </button>
           <button class="choice-btn" data-value="ふつう" data-sel="sel-mid" onclick="stepNext(this,'mood',1)">
-            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></div>
+            <div class="ic-emoji">
+              <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="24" cy="24" r="18" stroke="var(--mid)" stroke-width="2" fill="var(--mid-bg)"/>
+                <line x1="15" y1="27" x2="33" y2="27" stroke="var(--mid)" stroke-width="2.5" stroke-linecap="round"/>
+                <circle cx="18" cy="20" r="2" fill="var(--mid)"/>
+                <circle cx="30" cy="20" r="2" fill="var(--mid)"/>
+              </svg>
+            </div>
             <span class="c-label">ふつう</span>
           </button>
           <button class="choice-btn" data-value="しんどい" data-sel="sel-bad" onclick="stepNext(this,'mood',1)">
-            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 16s-1.5-3-4-3-4 3-4 3"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></div>
+            <div class="ic-emoji">
+              <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="24" cy="24" r="18" stroke="var(--bad)" stroke-width="2" fill="var(--bad-bg)"/>
+                <path d="M16 29 Q24 22 32 29" stroke="var(--bad)" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+                <circle cx="18" cy="20" r="2" fill="var(--bad)"/>
+                <circle cx="30" cy="20" r="2" fill="var(--bad)"/>
+                <path d="M28 16 Q30 13 32 16" stroke="var(--bad)" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+              </svg>
+            </div>
             <span class="c-label">しんどい</span>
           </button>
         </div>
       </div>
 
-      <!-- Step 1: 眠さ -->
+      <!-- Step 1: ペース -->
       <div class="step-slide" id="slide-1">
-        <div class="step-label">2 / 6 &nbsp;—&nbsp; 眠さは？</div>
-        <div class="choice-grid col3" data-field="sleepy">
-          <button class="choice-btn" data-value="ない" data-sel="sel-good" onclick="stepNext(this,'sleepy',2)">
-            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10A15.3 15.3 0 0 1 12 2z"/></svg></div>
-            <span class="c-label">ない</span>
+        <div class="step-label">2 / 3 &nbsp;—&nbsp; 今日はどんなペースでいく？</div>
+        <div class="choice-grid col3" data-field="pace">
+          <button class="choice-btn" data-value="ゆっくりいきたい" data-sel="sel-bad" onclick="stepNext(this,'pace',2)">
+            <div class="ic-emoji">
+              <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="24" cy="24" r="20" stroke="var(--bad)" stroke-width="2" fill="var(--bad-bg)"/>
+                <circle cx="24" cy="24" r="13" stroke="var(--bad)" stroke-width="1.5" fill="none" opacity=".5"/>
+                <circle cx="24" cy="24" r="6" fill="var(--bad)" opacity=".6"/>
+                <circle cx="24" cy="24" r="2.5" fill="var(--bad)"/>
+              </svg>
+            </div>
+            <span class="c-label">ゆっくり<br>いきたい</span>
           </button>
-          <button class="choice-btn" data-value="すこしある" data-sel="sel-mid" onclick="stepNext(this,'sleepy',2)">
-            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 18a5 5 0 0 0-10 0"/><line x1="12" y1="2" x2="12" y2="9"/><line x1="4.22" y1="10.22" x2="5.64" y2="11.64"/><line x1="2" y1="18" x2="4" y2="18"/><line x1="20" y1="18" x2="22" y2="18"/><line x1="18.36" y1="11.64" x2="19.78" y2="10.22"/></svg></div>
-            <span class="c-label">すこしある</span>
+          <button class="choice-btn" data-value="いつも通り" data-sel="sel-mid" onclick="stepNext(this,'pace',2)">
+            <div class="ic-emoji">
+              <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="24" cy="24" r="14" stroke="var(--mid)" stroke-width="2" fill="var(--mid-bg)"/>
+                <circle cx="24" cy="24" r="7" fill="var(--mid)" opacity=".5"/>
+                <circle cx="7" cy="24" r="5" stroke="var(--mid)" stroke-width="1.5" fill="var(--mid-bg)"/>
+                <circle cx="7" cy="24" r="2.5" fill="var(--mid)" opacity=".6"/>
+                <circle cx="41" cy="24" r="5" stroke="var(--mid)" stroke-width="1.5" fill="var(--mid-bg)"/>
+                <circle cx="41" cy="24" r="2.5" fill="var(--mid)" opacity=".6"/>
+              </svg>
+            </div>
+            <span class="c-label">いつも通り</span>
           </button>
-          <button class="choice-btn" data-value="かなりある" data-sel="sel-bad" onclick="stepNext(this,'sleepy',2)">
-            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/><path d="M14 10l2 2-2 2"/><path d="M10 10l-2 2 2 2"/></svg></div>
-            <span class="c-label">かなりある</span>
+          <button class="choice-btn" data-value="少しやってみたい" data-sel="sel-good" onclick="stepNext(this,'pace',2)">
+            <div class="ic-emoji">
+              <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- 軌跡の丸（下・小） -->
+                <circle cx="24" cy="40" r="4" fill="var(--good)" opacity=".25"/>
+                <!-- 軌跡の丸（中） -->
+                <circle cx="24" cy="30" r="6" fill="var(--good)" opacity=".45"/>
+                <!-- メインの丸（上・大・勢い） -->
+                <circle cx="24" cy="17" r="11" stroke="var(--good)" stroke-width="2" fill="var(--good-bg)"/>
+                <circle cx="24" cy="17" r="6" fill="var(--good)" opacity=".5"/>
+                <circle cx="24" cy="17" r="2.5" fill="var(--good)"/>
+                <!-- 上向きの輝き -->
+                <line x1="24" y1="3" x2="24" y2="1" stroke="var(--good)" stroke-width="2" stroke-linecap="round"/>
+                <line x1="31" y1="6" x2="33" y2="4" stroke="var(--good)" stroke-width="1.5" stroke-linecap="round"/>
+                <line x1="17" y1="6" x2="15" y2="4" stroke="var(--good)" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <span class="c-label">少し<br>やってみたい</span>
           </button>
         </div>
         <div class="step-back-row">
@@ -639,21 +721,41 @@ body{font-family:'DM Sans','Noto Sans JP',sans-serif;background:var(--bg);color:
         </div>
       </div>
 
-      <!-- Step 2: 体のしんどさ -->
+      <!-- Step 2: 集中 -->
       <div class="step-slide" id="slide-2">
-        <div class="step-label">3 / 6 &nbsp;—&nbsp; 体のしんどさは？</div>
-        <div class="choice-grid col3" data-field="body">
-          <button class="choice-btn" data-value="ない" data-sel="sel-good" onclick="stepNext(this,'body',3)">
-            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
-            <span class="c-label">ない</span>
+        <div class="step-label">3 / 3 &nbsp;—&nbsp; 集中できそう？</div>
+        <div class="choice-grid col3" data-field="focus">
+          <button class="choice-btn" data-value="できそう" data-sel="sel-good" onclick="stepNext(this,'focus',3)">
+            <div class="ic-emoji">
+              <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <polygon points="24,4 29,18 44,18 32,27 37,42 24,33 11,42 16,27 4,18 19,18"
+                  stroke="var(--good)" stroke-width="2" fill="var(--good-bg)"/>
+                <polygon points="24,12 27.5,22 38,22 29.5,28 32.5,38 24,32 15.5,38 18.5,28 10,22 20.5,22"
+                  fill="var(--good)" opacity=".4"/>
+              </svg>
+            </div>
+            <span class="c-label">できそう</span>
           </button>
-          <button class="choice-btn" data-value="すこしある" data-sel="sel-mid" onclick="stepNext(this,'body',3)">
-            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
-            <span class="c-label">すこしある</span>
+          <button class="choice-btn" data-value="ふつう" data-sel="sel-mid" onclick="stepNext(this,'focus',3)">
+            <div class="ic-emoji">
+              <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="24" cy="24" r="18" stroke="var(--mid)" stroke-width="2" fill="var(--mid-bg)"/>
+                <circle cx="24" cy="24" r="10" stroke="var(--mid)" stroke-width="1.5" fill="none" opacity=".5"/>
+                <circle cx="24" cy="24" r="4" fill="var(--mid)"/>
+              </svg>
+            </div>
+            <span class="c-label">ふつう</span>
           </button>
-          <button class="choice-btn" data-value="つよい" data-sel="sel-bad" onclick="stepNext(this,'body',3)">
-            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
-            <span class="c-label">つよい</span>
+          <button class="choice-btn" data-value="むずかしい" data-sel="sel-bad" onclick="stepNext(this,'focus',3)">
+            <div class="ic-emoji">
+              <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <polygon points="24,5 28,16 40,13 33,23 42,31 30,30 28,43 20,33 8,38 14,26 4,18 17,18"
+                  stroke="var(--bad)" stroke-width="2" fill="var(--bad-bg)"/>
+                <line x1="20" y1="20" x2="28" y2="28" stroke="var(--bad)" stroke-width="2" stroke-linecap="round"/>
+                <line x1="28" y1="20" x2="20" y2="28" stroke="var(--bad)" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <span class="c-label">むずかしい</span>
           </button>
         </div>
         <div class="step-back-row">
@@ -661,59 +763,15 @@ body{font-family:'DM Sans','Noto Sans JP',sans-serif;background:var(--bg);color:
         </div>
       </div>
 
-      <!-- Step 3: 集中 -->
+      <!-- Step 3: メモ -->
       <div class="step-slide" id="slide-3">
-        <div class="step-label">4 / 6 &nbsp;—&nbsp; 集中できそう？</div>
-        <div class="choice-grid col3" data-field="focus">
-          <button class="choice-btn" data-value="できそう" data-sel="sel-good" onclick="stepNext(this,'focus',4)">
-            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
-            <span class="c-label">できそう</span>
-          </button>
-          <button class="choice-btn" data-value="ふつう" data-sel="sel-mid" onclick="stepNext(this,'focus',4)">
-            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></div>
-            <span class="c-label">ふつう</span>
-          </button>
-          <button class="choice-btn" data-value="むずかしい" data-sel="sel-bad" onclick="stepNext(this,'focus',4)">
-            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
-            <span class="c-label">むずかしい</span>
-          </button>
-        </div>
-        <div class="step-back-row">
-          <button class="step-back-btn" onclick="stepGo(2)">← もどる</button>
-        </div>
-      </div>
-
-      <!-- Step 4: 作業量 -->
-      <div class="step-slide" id="slide-4">
-        <div class="step-label">5 / 6 &nbsp;—&nbsp; 今日やれそうなこと</div>
-        <div class="choice-grid col3" data-field="task">
-          <button class="choice-btn" data-value="軽い作業" data-sel="sel-good" onclick="stepNext(this,'task',5)">
-            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
-            <span class="c-label">軽い作業</span>
-          </button>
-          <button class="choice-btn" data-value="普段通りの作業" data-sel="sel-blue" onclick="stepNext(this,'task',5)">
-            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M5.34 18.66l-1.41 1.41M3 12H1m22 0h-2M5.34 5.34 3.93 3.93M18.66 18.66l1.41 1.41M12 21v2M12 1v2"/></svg></div>
-            <span class="c-label">普段通り</span>
-          </button>
-          <button class="choice-btn" data-value="わからない" data-sel="sel-mid" onclick="stepNext(this,'task',5)">
-            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
-            <span class="c-label">わからない</span>
-          </button>
-        </div>
-        <div class="step-back-row">
-          <button class="step-back-btn" onclick="stepGo(3)">← もどる</button>
-        </div>
-      </div>
-
-      <!-- Step 5: メモ -->
-      <div class="step-slide" id="slide-5">
-        <div class="step-label">6 / 6 &nbsp;—&nbsp; 一言メモ（任意）</div>
+        <div class="step-label">メモ（任意）&nbsp;—&nbsp; 一言あれば</div>
         <textarea class="memo-area" id="memo" placeholder="なんでも…" rows="4"></textarea>
         <div class="step-back-row">
-          <button class="step-back-btn" onclick="stepGo(4)">← もどる</button>
+          <button class="step-back-btn" onclick="stepGo(2)">← もどる</button>
           <button class="memo-skip-btn" onclick="skipMemo()">スキップ →</button>
         </div>
-        <button class="submit-btn" style="margin-top:1rem;" onclick="submitRecord()">記録する</button>
+        <button class="submit-btn" style="margin-top:1rem;" onclick="submitRecord()">決定する</button>
       </div>
 
     </div><!-- /step-wrap -->
@@ -728,7 +786,7 @@ body{font-family:'DM Sans','Noto Sans JP',sans-serif;background:var(--bg);color:
     <div class="ty-blob">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
     </div>
-    <div class="ty-title">記録しました！</div>
+    <div class="ty-title">決定しました！</div>
     <div class="state-label" id="state-label"></div>
     <div class="state-visual" id="state-visual"></div>
     <div class="ty-sub" id="ty-sub-msg">お疲れ様でした。<br>次の方はボタンを押してください。</div>
@@ -982,7 +1040,7 @@ const goUser=async()=>{
   renderNameGrid();
 };
 
-const sel={mood:null,sleepy:null,body:null,focus:null,task:null};
+const sel={mood:null,pace:null,focus:null};
 let selName=null;
 
 async function renderNameGrid(){
@@ -1014,7 +1072,7 @@ function clearNameSelection(){
 
 // ===== ステップ式フォーム制御 =====
 let currentStep = 0;
-const TOTAL_STEPS = 6;
+const TOTAL_STEPS = 4;
 
 function stepGo(n) {
   // 現在のスライドを非表示
@@ -1056,6 +1114,7 @@ function resetSteps() {
   });
   for(let i = 0; i < TOTAL_STEPS; i++) {
     const pip = document.getElementById('pip-' + i);
+    if(!pip) continue;
     pip.classList.remove('active', 'done');
     if(i === 0) pip.classList.add('active');
   }
@@ -1069,16 +1128,19 @@ function showToast(msg){const t=document.getElementById('toast');t.textContent=m
 async function submitRecord(){
   stopAutoReturn(); // ★追加
   if(!selName){showToast('⚠ お名前を選んでください');return;}
-  const labels={mood:'気分',sleepy:'眠さ',body:'体のしんどさ',focus:'集中',task:'やれそうなこと'};
+  const labels={mood:'気分',pace:'今日のペース',focus:'集中'};
   const miss=Object.entries(sel).find(([k,v])=>!v);
   if(miss){showToast('⚠ 「'+labels[miss[0]]+'」を選んでください');return;}
   const memo=document.getElementById('memo').value.trim();
   const now=new Date();
   const timeStr=now.toLocaleString('ja-JP',{year:'numeric',month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'});
   showLoading(true);
-  await saveRecord({name:selName,...sel,memo,time:timeStr,ts:now.getTime()});
+  const record={name:selName,mood:sel.mood,pace:sel.pace,focus:sel.focus,
+    sleepy:'—',body:'—',task:sel.pace,  // 後方互換のため
+    memo,time:timeStr,ts:now.getTime()};
+  await saveRecord(record);
   showLoading(false);
-  const lastRecord={name:selName,...sel,memo,time:timeStr,ts:now.getTime()};
+  const lastRecord=record;
   document.getElementById('form-area').style.display='none';
   document.getElementById('thankyou').style.display='flex';
   document.getElementById('thankyou').style.gridColumn='1 / -1';
@@ -1105,19 +1167,25 @@ function resetForm(){
 let curFilter='all', curSort='time';
 
 function calcScore(r){
-  const mood   ={よい:0,ふつう:1,しんどい:3}[r.mood]   ?? 0;
-  const sleepy ={ない:0,すこしある:1,かなりある:2}[r.sleepy] ?? 0;
-  const body   ={ない:0,すこしある:2,つよい:3}[r.body]   ?? 0;
-  const focus  ={できそう:0,ふつう:1,むずかしい:2}[r.focus]  ?? 0;
-  const task   ={普段通りの作業:0,軽い作業:1,わからない:2}[r.task] ?? 0;
-  return mood + sleepy + body + focus + task;
+  // ペース中心のスコア（低いほど支援ニーズが高い）
+  const mood  ={よい:0,ふつう:1,しんどい:2}[r.mood]  ?? 0;
+  const pace  ={少しやってみたい:0,いつも通り:1,ゆっくりいきたい:2}[r.pace] ?? 0;
+  const focus ={できそう:0,ふつう:1,むずかしい:2}[r.focus] ?? 0;
+  return mood + pace + focus;
+}
+function paceLabel(r){
+  const p=r.pace||r.task||'';
+  if(p==='少しやってみたい') return {cls:'s-low', text:'チャレンジ'};
+  if(p==='いつも通り')      return {cls:'s-mid', text:'いつも通り'};
+  if(p==='ゆっくりいきたい') return {cls:'s-high',text:'ゆっくり'};
+  return {cls:'s-mid',text:'—'};
 }
 function scoreLabel(s){
-  if(s>=8) return {cls:'s-high',text:'高'};
-  if(s>=4) return {cls:'s-mid', text:'中'};
-  return          {cls:'s-low', text:'低'};
+  if(s>=4) return {cls:'s-high',text:'サポートあり'};
+  if(s>=2) return {cls:'s-mid', text:'通常'};
+  return          {cls:'s-low', text:'積極的'};
 }
-const SCORE_MAX=12;
+const SCORE_MAX=6;
 
 function switchTab(id,btn){
   document.querySelectorAll('.staff-tab').forEach(t=>t.classList.remove('active'));
@@ -1153,7 +1221,7 @@ async function renderRecords(){
   const warnSvg=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`;
   const fillColor=s=>s>=8?'var(--bad)':s>=4?'var(--mid)':'var(--good)';
   list.innerHTML=sorted.map(r=>{
-    const sc=r._score, sl=scoreLabel(sc), isUrgent=sc>=8;
+    const sc=r._score, sl=scoreLabel(sc), isUrgent=sc>=4;
     const pct=Math.round(Math.min(sc/SCORE_MAX*100,100));
     return `
     <div class="r-card ${moodCls(r.mood)}${isUrgent?' urgent':''}">
@@ -1161,7 +1229,7 @@ async function renderRecords(){
         <span class="r-name"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>${esc(r.name)}</span>
         <span style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap;justify-content:flex-end;">
           ${isUrgent?`<span class="urgent-tag">${warnSvg}要対応</span>`:''}
-          <span class="score-badge ${sl.cls}">${warnSvg}危険度 ${sl.text}</span>
+          <span class="score-badge ${sl.cls}">${esc(paceLabel(r).text)}</span>
           <span class="r-time"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${esc(r.time)}</span>
         </span>
       </div>
@@ -1171,10 +1239,8 @@ async function renderRecords(){
       </div>
       <div class="r-chips" style="margin-top:.5rem">
         <span class="chip ${r.mood==='しんどい'?'ca':''}"><span>気分</span>${esc(r.mood)}</span>
-        <span class="chip ${r.sleepy==='かなりある'?'ca':''}"><span>眠さ</span>${esc(r.sleepy)}</span>
-        <span class="chip ${r.body==='つよい'?'ca':''}"><span>体</span>${esc(r.body)}</span>
-        <span class="chip"><span>集中</span>${esc(r.focus)}</span>
-        <span class="chip"><span>作業</span>${esc(r.task)}</span>
+        <span class="chip ${(r.pace||r.task)==='ゆっくりいきたい'?'ca':''}"><span>ペース</span>${esc(r.pace||r.task||'—')}</span>
+        <span class="chip ${r.focus==='むずかしい'?'ca':''}"><span>集中</span>${esc(r.focus)}</span>
       </div>
       ${r.memo?`<div class="r-memo">${esc(r.memo)}</div>`:''}
     </div>`;
@@ -1207,17 +1273,22 @@ async function populateReportSelect(){
   if(cur)s.value=cur;
 }
 
-const FIELD_LABELS={score:'危険度スコア',mood:'気分',sleepy:'眠さ',body:'体のしんどさ',focus:'集中'};
-const FIELD_COLORS={score:'#6c8eff',mood:'#34d399',sleepy:'#fbbf24',body:'#f87171',focus:'#a78bfa'};
+const FIELD_LABELS={score:'サポート指数',mood:'気分',pace:'ペース',focus:'集中'};
+const FIELD_COLORS={score:'#6c8eff',mood:'#34d399',pace:'#fbbf24',focus:'#a78bfa'};
 let _chartInstance=null;
 let _activeFields=new Set(['score']);
 let _reportData=[];
 
 function toNum(r, key){
-  if(key==='score') return 6 - calcScore(r);
+  if(key==='score'){
+    const s=calcScore(r);
+    return (SCORE_MAX/2) - s; // 0が中央
+  }
   if(key==='mood') return r.mood==='よい'?2:r.mood==='ふつう'?0:-2;
-  if(key==='sleepy') return r.sleepy==='ない'?2:r.sleepy==='すこしある'?0:-2;
-  if(key==='body') return r.body==='ない'?2:r.body==='すこしある'?0:-2;
+  if(key==='pace'){
+    const p=r.pace||r.task||'';
+    return p==='少しやってみたい'?2:p==='いつも通り'?0:-2;
+  }
   if(key==='focus') return r.focus==='できそう'?2:r.focus==='ふつう'?0:-2;
   return null;
 }
@@ -1329,19 +1400,19 @@ async function runAiAnalysis(name){
   const rows = _reportData.map(r=>{
     const d=new Date(r.ts);
     const dateStr=(d.getMonth()+1)+'月'+d.getDate()+'日';
-    return `${dateStr}: 危険度${calcScore(r)}点 気分=${r.mood} 眠さ=${r.sleepy} 体=${r.body} 集中=${r.focus} 作業=${r.task}${r.memo?(' メモ:'+r.memo):''}`;
+    const pace=r.pace||r.task||'—';
+    return `${dateStr}: 気分=${r.mood} ペース=${pace} 集中=${r.focus}${r.memo?(' メモ:'+r.memo):''}`;
   }).join('\n');
   const prompt = `あなたは福祉施設の支援スタッフをサポートするAIアシスタントです。
-以下は「${name}」さんの体調・気分の記録データです（日別、新しい順）。
+以下は「${name}」さんの「今日のペース決定」の記録データです（日別）。
 
 ${rows}
 
-危険度スコアは0〜12点で、高いほど注意が必要です（8点以上は要対応）。
-各項目のスコア換算：気分(よい=0,ふつう=1,しんどい=3)、眠さ(ない=0,すこし=1,かなり=2)、体(ない=0,すこし=2,つよい=3)、集中(できそう=0,ふつう=1,むずかしい=2)、作業(普段通り=0,軽い=1,わからない=2)
+ペースの意味：「少しやってみたい」=積極的、「いつも通り」=標準、「ゆっくりいきたい」=サポートが必要
 
 以下の2点を日本語で分析してください：
-1. 【傾向・パターン】グラフ全体の傾向、繰り返しのパターン、変化の特徴
-2. 【注目ポイント】職員が特に気をつけるべき点、異常値、急激な変化など
+1. 【傾向・パターン】ペースや気分の全体的な傾向、繰り返しのパターン
+2. 【支援のポイント】職員が特に気をつけるべき日や変化、サポートのタイミング
 
 簡潔に、箇条書きを使わず自然な文章で、3〜5文程度でまとめてください。`;
   try {
@@ -1715,15 +1786,20 @@ function buildStateVisual(record){
 
   document.getElementById('state-visual').innerHTML=svg;
   document.getElementById('state-label').textContent=p.label;
-  const msgs=['いい調子です。今日もよい一日を！','まずまずの状態ですね。無理せず過ごしましょう。','少し疲れているようです。休憩を取りながら進めましょう。','お体がつらそうです。職員にひと声かけてください。'];
-  document.getElementById('ty-sub-msg').innerHTML=msgs[band]+'<br><span style="font-size:.8em;color:var(--muted)">次の方はボタンを押してください。</span>';
+  const paceV=record&&record.pace||'';
+  let paceMsg='';
+  if(paceV==='少しやってみたい') paceMsg='今日は少しやってみましょう！';
+  else if(paceV==='いつも通り')   paceMsg='いつも通りのペースで進めましょう。';
+  else if(paceV==='ゆっくりいきたい') paceMsg='今日はゆっくりいきましょう。';
+  else paceMsg='自分のペースで進めましょう。';
+  document.getElementById('ty-sub-msg').innerHTML='<strong style="font-size:1.1em">'+paceMsg+'</strong><br><span style="font-size:.8em;color:var(--muted)">次の方はボタンを押してください。</span>';
 }
 
 // ===== リアルタイムビジュアル =====
 function buildLiveVisual(){
   const box = document.getElementById('live-visual-box');
   if(!box) return;
-  const r = {mood:sel.mood||'ふつう',sleepy:sel.sleepy||'ない',body:sel.body||'ない',focus:sel.focus||'ふつう',task:sel.task||'普段通りの作業'};
+  const r = {mood:sel.mood||'ふつう',pace:sel.pace||'いつも通り',focus:sel.focus||'ふつう'};
   const hasAny = Object.values(sel).some(v=>v!==null);
   const score = hasAny ? calcScore(r) : -1;
   const band = score<0?-1:score<=3?0:score<=6?1:score<=9?2:3;
