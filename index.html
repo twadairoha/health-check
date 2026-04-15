@@ -557,6 +557,80 @@ body{font-family:'DM Sans','Noto Sans JP',sans-serif;background:var(--bg);color:
   transition: all .15s;
 }
 .memo-skip-btn:hover { border-color: var(--primary); color: var(--primary); }
+
+/* ===== 今日タブ ===== */
+.today-header{
+  display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:.8rem;margin-bottom:1.5rem;
+}
+.today-date{
+  font-size:1rem;font-weight:700;color:var(--text);
+}
+.today-count{
+  font-size:.78rem;color:var(--muted);font-weight:600;
+}
+.today-sync-btn{
+  display:flex;align-items:center;gap:.35rem;
+  padding:.5rem 1.1rem;border:1.5px solid var(--border);border-radius:999px;
+  background:transparent;font-family:inherit;font-size:.78rem;font-weight:600;
+  color:var(--muted);cursor:pointer;transition:all .15s;
+}
+.today-sync-btn:hover{border-color:var(--primary);color:var(--primary);}
+.today-sync-btn svg{width:13px;height:13px;}
+.today-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+  gap:.8rem;
+}
+.today-card{
+  background:var(--surface);
+  border:2px solid var(--border);
+  border-radius:var(--radius);
+  padding:1.1rem 1.2rem;
+  display:flex;flex-direction:column;gap:.5rem;
+  transition:border-color .2s;
+}
+.today-card.pace-slow  { border-color:var(--bad);  background:var(--bad-bg); }
+.today-card.pace-mid   { border-color:var(--mid);  background:var(--mid-bg); }
+.today-card.pace-fast  { border-color:var(--good); background:var(--good-bg); }
+.today-card.no-record  { border-style:dashed; opacity:.5; }
+.today-name{
+  font-size:1rem;font-weight:700;color:var(--text);
+}
+.today-pace{
+  font-size:.9rem;font-weight:700;
+}
+.today-card.pace-slow  .today-pace { color:var(--bad); }
+.today-card.pace-mid   .today-pace { color:var(--mid); }
+.today-card.pace-fast  .today-pace { color:var(--good); }
+.today-card.no-record  .today-pace { color:var(--muted); }
+.today-meta{
+  font-size:.72rem;color:var(--muted);display:flex;gap:.6rem;flex-wrap:wrap;
+}
+.today-mood-chip{
+  display:inline-flex;align-items:center;
+  padding:.15em .6em;border-radius:999px;
+  font-size:.7rem;font-weight:600;
+  background:var(--surface2);color:var(--muted);
+}
+.today-time{
+  font-size:.7rem;color:var(--muted);margin-top:auto;
+}
+.today-memo{
+  font-size:.78rem;color:var(--muted);font-style:italic;
+  border-top:1px solid var(--border);padding-top:.4rem;
+  line-height:1.5;
+}
+.today-summary{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:.6rem;margin-bottom:1.2rem;
+}
+.today-sum-box{
+  background:var(--surface);border:1.5px solid var(--border);
+  border-radius:var(--radius-sm);padding:.8rem;text-align:center;
+}
+.today-sum-n{ font-size:1.8rem;font-weight:700; }
+.today-sum-l{ font-size:.68rem;color:var(--muted);margin-top:.1rem; }
 </style>
 </head>
 <body>
@@ -810,14 +884,20 @@ body{font-family:'DM Sans','Noto Sans JP',sans-serif;background:var(--bg);color:
   </div>
 
   <div class="staff-tabs">
-    <button class="staff-tab active" onclick="switchTab('records',this)">記録一覧</button>
+    <button class="staff-tab active" onclick="switchTab('today',this)">📋 今日</button>
+    <button class="staff-tab" onclick="switchTab('records',this)">記録一覧</button>
     <button class="staff-tab" onclick="switchTab('report',this)">レポート</button>
     <button class="staff-tab" onclick="switchTab('names',this)">利用者名の管理</button>
     <button class="staff-tab" onclick="switchTab('gas',this)">⚙️ クラウド設定</button>
   </div>
 
+  <!-- 今日 -->
+  <div class="tab-content" id="tab-today">
+    <div id="today-body"></div>
+  </div>
+
   <!-- 記録一覧 -->
-  <div class="tab-content active" id="tab-records">
+  <div class="tab-content" id="tab-records">
     <div class="stats-row" id="stats"></div>
     <div class="filter-bar">
       <button class="f-btn active" onclick="setFilter('all',this)">すべて</button>
@@ -1011,6 +1091,10 @@ async function saveNames(names){
 const showScreen=id=>{document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('screen-'+id).classList.add('active');window.scrollTo({top:0,behavior:'smooth'});};
 const goStaff=async()=>{
   showScreen('staff');
+  // 「今日」タブをデフォルトで選択
+  document.querySelectorAll('.staff-tab').forEach((t,i)=>{t.classList.toggle('active',i===0);});
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-today').classList.add('active');
   if(GAS_URL){
     showLoading(true);
     try{
@@ -1023,9 +1107,10 @@ const goStaff=async()=>{
     } catch(e){ console.warn('同期失敗、キャッシュ使用:', e); }
     showLoading(false);
   }
+  renderToday();
   renderRecords();
   renderNameList();
-  populateReportSelect(); // ★修正：職員画面を開いたときレポート選択を更新
+  populateReportSelect();
 };
 const goUser=async()=>{
   showScreen('user');
@@ -1191,15 +1276,15 @@ function switchTab(id,btn){
   document.querySelectorAll('.staff-tab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
   btn.classList.add('active');document.getElementById('tab-'+id).classList.add('active');
-  if(id==='names') renderNameList();
-  if(id==='report'){ populateReportSelect(); renderReport(); } // ★修正：populateReportSelectを追加
+  if(id==='today')  renderToday();
+  if(id==='names')  renderNameList();
+  if(id==='report'){ populateReportSelect(); renderReport(); }
   if(id==='gas'){const inp=document.getElementById('gas-url-input');if(inp&&GAS_URL)inp.value=GAS_URL;updateGasStatus(!!GAS_URL);}
 }
 
 const moodCls=m=>m==='よい'?'mg':m==='しんどい'?'mb':'mm';
 function renderStats(recs){
   const t=recs.length,g=recs.filter(r=>r.mood==='よい').length,m=recs.filter(r=>r.mood==='ふつう').length,b=recs.filter(r=>r.mood==='しんどい').length;
-  const urgent=recs.filter(r=>calcScore(r)>=8).length;
   document.getElementById('stats').innerHTML=`
     <div class="stat-box"><div class="stat-n c-total">${t}</div><div class="stat-l">総記録数</div></div>
     <div class="stat-box"><div class="stat-n c-good">${g}</div><div class="stat-l">よい</div></div>
@@ -1221,21 +1306,16 @@ async function renderRecords(){
   const warnSvg=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`;
   const fillColor=s=>s>=8?'var(--bad)':s>=4?'var(--mid)':'var(--good)';
   list.innerHTML=sorted.map(r=>{
-    const sc=r._score, sl=scoreLabel(sc), isUrgent=sc>=4;
-    const pct=Math.round(Math.min(sc/SCORE_MAX*100,100));
+
     return `
-    <div class="r-card ${moodCls(r.mood)}${isUrgent?' urgent':''}">
+    <div class="r-card ${moodCls(r.mood)}">
       <div class="r-head">
         <span class="r-name"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>${esc(r.name)}</span>
         <span style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap;justify-content:flex-end;">
-          ${isUrgent?`<span class="urgent-tag">${warnSvg}要対応</span>`:''}
-          <span class="score-badge ${sl.cls}">${esc(paceLabel(r).text)}</span>
+
+
           <span class="r-time"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${esc(r.time)}</span>
         </span>
-      </div>
-      <div class="score-bar-wrap">
-        <div class="score-bar-track"><div class="score-bar-fill" style="width:${pct}%;background:${fillColor(sc)}"></div></div>
-        <span class="score-val">${sc}/${SCORE_MAX}</span>
       </div>
       <div class="r-chips" style="margin-top:.5rem">
         <span class="chip ${r.mood==='しんどい'?'ca':''}"><span>気分</span>${esc(r.mood)}</span>
@@ -1720,6 +1800,132 @@ async function syncFromGas(){
 function copyGasCode(){
   navigator.clipboard.writeText(GAS_CODE).then(()=>showToast('✓ コードをコピーしました'));
 }
+// ===== 今日タブ =====
+async function renderToday(){
+  const body = document.getElementById('today-body');
+  if(!body) return;
+
+  // 同期（GASあれば）
+  if(GAS_URL){
+    showLoading(true);
+    try{
+      const [dr,dn] = await Promise.all([
+        gasRequest({action:'getRecords'}),
+        gasRequest({action:'getNames'})
+      ]);
+      saveCachedRecords(dr.records);
+      saveCachedNames(dn.names);
+    } catch(e){ console.warn('同期失敗:', e); }
+    showLoading(false);
+  }
+
+  const allRecs  = getCachedRecords();
+  const allNames = getCachedNames();
+
+  // 今日の日付キー
+  const today = new Date();
+  const yy = today.getFullYear();
+  const mm = String(today.getMonth()+1).padStart(2,'0');
+  const dd = String(today.getDate()).padStart(2,'0');
+  const todayLabel = yy+'年'+parseInt(mm)+'月'+parseInt(dd)+'日（'+['日','月','火','水','木','金','土'][today.getDay()]+'）';
+
+  // 今日の記録を抽出（各人の最新1件）
+  const todayRecs = {};
+  allRecs.forEach(r=>{
+    if(!r.time) return;
+    const t = String(r.time);
+    // time形式: "2026/4/8 10:30" or "2026/04/08 10:30"
+    const datePart = t.split(' ')[0].replace(/\//g,'-');
+    const d = new Date(datePart);
+    if(d.getFullYear()===yy && d.getMonth()+1===parseInt(mm) && d.getDate()===parseInt(dd)){
+      if(!todayRecs[r.name] || r.ts > todayRecs[r.name].ts){
+        todayRecs[r.name] = r;
+      }
+    }
+  });
+
+  const recorded = Object.values(todayRecs);
+  const slowCount = recorded.filter(r=>(r.pace||r.task)==='ゆっくりいきたい').length;
+  const midCount  = recorded.filter(r=>(r.pace||r.task)==='いつも通り').length;
+  const fastCount = recorded.filter(r=>(r.pace||r.task)==='少しやってみたい').length;
+
+  // ペースアイコン
+  const paceIcon = p=>{
+    if(p==='ゆっくりいきたい') return '🐢';
+    if(p==='いつも通り')      return '🚶';
+    if(p==='少しやってみたい') return '🚀';
+    return '—';
+  };
+  const paceClass = p=>{
+    if(p==='ゆっくりいきたい') return 'pace-slow';
+    if(p==='いつも通り')      return 'pace-mid';
+    if(p==='少しやってみたい') return 'pace-fast';
+    return 'no-record';
+  };
+
+  // 未記録の人も表示
+  const notRecorded = allNames.filter(n=>!todayRecs[n]);
+
+  // カード生成
+  const recordedCards = recorded
+    .sort((a,b)=>{
+      const order={'ゆっくりいきたい':0,'いつも通り':1,'少しやってみたい':2};
+      return (order[a.pace||a.task]??1) - (order[b.pace||b.task]??1);
+    })
+    .map(r=>{
+      const pace = r.pace||r.task||'—';
+      const timeStr = String(r.time).split(' ')[1]||'';
+      return `<div class="today-card ${paceClass(pace)}">
+        <div class="today-name">${esc(r.name)}</div>
+        <div class="today-pace">${paceIcon(pace)} ${esc(pace)}</div>
+        <div class="today-meta">
+          <span class="today-mood-chip">気分：${esc(r.mood||'—')}</span>
+          <span class="today-mood-chip">集中：${esc(r.focus||'—')}</span>
+        </div>
+        ${r.memo?`<div class="today-memo">${esc(r.memo)}</div>`:''}
+        <div class="today-time">${timeStr} 記録</div>
+      </div>`;
+    }).join('');
+
+  const unrecordedCards = notRecorded.map(n=>
+    `<div class="today-card no-record">
+      <div class="today-name">${esc(n)}</div>
+      <div class="today-pace">— 未記録</div>
+    </div>`
+  ).join('');
+
+  body.innerHTML = `
+    <div class="today-header">
+      <div>
+        <div class="today-date">${todayLabel}</div>
+        <div class="today-count">記録済み ${recorded.length} 名 / 全 ${allNames.length} 名</div>
+      </div>
+      <button class="today-sync-btn" onclick="renderToday()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><polyline points="23 20 23 14 17 14"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>
+        更新
+      </button>
+    </div>
+    <div class="today-summary">
+      <div class="today-sum-box">
+        <div class="today-sum-n" style="color:var(--bad)">${slowCount}</div>
+        <div class="today-sum-l">🐢 ゆっくり</div>
+      </div>
+      <div class="today-sum-box">
+        <div class="today-sum-n" style="color:var(--mid)">${midCount}</div>
+        <div class="today-sum-l">🚶 いつも通り</div>
+      </div>
+      <div class="today-sum-box">
+        <div class="today-sum-n" style="color:var(--good)">${fastCount}</div>
+        <div class="today-sum-l">🚀 やってみる</div>
+      </div>
+    </div>
+    <div class="today-grid">
+      ${recordedCards}
+      ${unrecordedCards}
+    </div>
+  `;
+}
+
 
 (function initGas(){
   const savedUrl = localStorage.getItem('gas_url');
