@@ -1800,6 +1800,63 @@ async function syncFromGas(){
 function copyGasCode(){
   navigator.clipboard.writeText(GAS_CODE).then(()=>showToast('✓ コードをコピーしました'));
 }
+// ===== LINEで共有 =====
+function shareToLine(todayLabel, recorded, notRecorded){
+  const paceIcon = p=>{
+    if(p==='ゆっくりいきたい') return '🐢';
+    if(p==='いつも通り')      return '🚶';
+    if(p==='少しやってみたい') return '🚀';
+    return '—';
+  };
+
+  let text = '📋 今日のペース一覧\n';
+  text += todayLabel + '\n';
+  text += '─────────────\n';
+
+  // ペース別にグループ化
+  const slow = recorded.filter(r=>(r.pace||r.task)==='ゆっくりいきたい');
+  const mid  = recorded.filter(r=>(r.pace||r.task)==='いつも通り');
+  const fast = recorded.filter(r=>(r.pace||r.task)==='少しやってみたい');
+
+  if(slow.length){
+    text += '\n🐢 ゆっくりいきたい\n';
+    slow.forEach(r=>{
+      text += '・' + r.name;
+      if(r.memo) text += '（' + r.memo + '）';
+      text += '\n';
+    });
+  }
+  if(mid.length){
+    text += '\n🚶 いつも通り\n';
+    mid.forEach(r=>{
+      text += '・' + r.name;
+      if(r.memo) text += '（' + r.memo + '）';
+      text += '\n';
+    });
+  }
+  if(fast.length){
+    text += '\n🚀 少しやってみたい\n';
+    fast.forEach(r=>{
+      text += '・' + r.name;
+      if(r.memo) text += '（' + r.memo + '）';
+      text += '\n';
+    });
+  }
+  if(notRecorded.length){
+    text += '\n⬜ 未記録\n';
+    notRecorded.forEach(n=>{ text += '・' + n + '\n'; });
+  }
+
+  text += '─────────────\n';
+  text += '記録済み ' + recorded.length + ' 名 / 全 ' + (recorded.length + notRecorded.length) + ' 名';
+
+  // LINEアプリを開いてテキストをセット
+  const encoded = encodeURIComponent(text);
+  // モバイルはLINEアプリ、PCはLINE URLスキームで開く
+  const lineUrl = 'https://line.me/R/msg/text/?' + encoded;
+  window.open(lineUrl, '_blank');
+}
+
 // ===== 今日タブ =====
 async function renderToday(){
   const body = document.getElementById('today-body');
@@ -1900,10 +1957,16 @@ async function renderToday(){
         <div class="today-date">${todayLabel}</div>
         <div class="today-count">記録済み ${recorded.length} 名 / 全 ${allNames.length} 名</div>
       </div>
-      <button class="today-sync-btn" onclick="renderToday()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><polyline points="23 20 23 14 17 14"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>
-        更新
-      </button>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+        <button class="today-sync-btn" onclick="renderToday()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><polyline points="23 20 23 14 17 14"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>
+          更新
+        </button>
+        <button class="today-sync-btn" style="background:var(--good-bg);border-color:var(--good);color:var(--good);" onclick="shareToLine(${JSON.stringify(todayLabel)}, ${JSON.stringify(recorded)}, ${JSON.stringify(notRecorded)})">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          LINEで送る
+        </button>
+      </div>
     </div>
     <div class="today-summary">
       <div class="today-sum-box">
