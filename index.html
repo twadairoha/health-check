@@ -770,7 +770,7 @@ body{font-family:'DM Sans','Noto Sans JP',sans-serif;background:var(--bg);color:
             </div>
             <span class="c-label">いつも通り</span>
           </button>
-          <button class="choice-btn" data-value="いつもよりやれそう" data-sel="sel-good" onclick="stepNext(this,'pace',2)">
+          <button class="choice-btn" data-value="今日は調子いい" data-sel="sel-good" onclick="stepNext(this,'pace',2)">
             <div class="ic-emoji">
               <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <!-- 軌跡の丸（下・小） -->
@@ -1254,13 +1254,13 @@ let curFilter='all', curSort='time';
 function calcScore(r){
   // ペース中心のスコア（低いほど支援ニーズが高い）
   const mood  ={よい:0,ふつう:1,しんどい:2}[r.mood]  ?? 0;
-  const pace  ={いつもよりやれそう:0,いつも通り:1,ゆっくりいきたい:2}[r.pace] ?? 0;
+  const pace  ={今日は調子いい:0,いつも通り:1,ゆっくりいきたい:2}[r.pace] ?? 0;
   const focus ={できそう:0,ふつう:1,むずかしい:2}[r.focus] ?? 0;
   return mood + pace + focus;
 }
 function paceLabel(r){
   const p=r.pace||r.task||'';
-  if(p==='いつもよりやれそう') return {cls:'s-low', text:'チャレンジ'};
+  if(p==='今日は調子いい') return {cls:'s-low', text:'チャレンジ'};
   if(p==='いつも通り')      return {cls:'s-mid', text:'いつも通り'};
   if(p==='ゆっくりいきたい') return {cls:'s-high',text:'ゆっくり'};
   return {cls:'s-mid',text:'—'};
@@ -1367,7 +1367,7 @@ function toNum(r, key){
   if(key==='mood') return r.mood==='よい'?2:r.mood==='ふつう'?0:-2;
   if(key==='pace'){
     const p=r.pace||r.task||'';
-    return p==='いつもよりやれそう'?2:p==='いつも通り'?0:-2;
+    return p==='今日は調子いい'?2:p==='いつも通り'?0:-2;
   }
   if(key==='focus') return r.focus==='できそう'?2:r.focus==='ふつう'?0:-2;
   return null;
@@ -1488,7 +1488,7 @@ async function runAiAnalysis(name){
 
 ${rows}
 
-ペースの意味：「いつもよりやれそう」=積極的、「いつも通り」=標準、「ゆっくりいきたい」=サポートが必要
+ペースの意味：「今日は調子いい」=積極的、「いつも通り」=標準、「ゆっくりいきたい」=サポートが必要
 
 以下の2点を日本語で分析してください：
 1. 【傾向・パターン】ペースや気分の全体的な傾向、繰り返しのパターン
@@ -1805,7 +1805,7 @@ function shareToLine(todayLabel, recorded, notRecorded){
   const paceIcon = p=>{
     if(p==='ゆっくりいきたい') return '🐢';
     if(p==='いつも通り')      return '🚶';
-    if(p==='いつもよりやれそう') return '🚀';
+    if(p==='今日は調子いい') return '🚀';
     return '—';
   };
 
@@ -1816,7 +1816,7 @@ function shareToLine(todayLabel, recorded, notRecorded){
   // ペース別にグループ化
   const slow = recorded.filter(r=>(r.pace||r.task)==='ゆっくりいきたい');
   const mid  = recorded.filter(r=>(r.pace||r.task)==='いつも通り');
-  const fast = recorded.filter(r=>(r.pace||r.task)==='いつもよりやれそう');
+  const fast = recorded.filter(r=>(r.pace||r.task)==='今日は調子いい');
 
   if(slow.length){
     text += '\n🐢 ゆっくりいきたい\n';
@@ -1835,7 +1835,7 @@ function shareToLine(todayLabel, recorded, notRecorded){
     });
   }
   if(fast.length){
-    text += '\n🚀 いつもよりやれそう\n';
+    text += '\n🚀 今日は調子いい\n';
     fast.forEach(r=>{
       text += '・' + r.name;
       if(r.memo) text += '（' + r.memo + '）';
@@ -1904,19 +1904,19 @@ async function renderToday(){
   const recorded = Object.values(todayRecs);
   const slowCount = recorded.filter(r=>(r.pace||r.task)==='ゆっくりいきたい').length;
   const midCount  = recorded.filter(r=>(r.pace||r.task)==='いつも通り').length;
-  const fastCount = recorded.filter(r=>(r.pace||r.task)==='いつもよりやれそう').length;
+  const fastCount = recorded.filter(r=>(r.pace||r.task)==='今日は調子いい').length;
 
   // ペースアイコン
   const paceIcon = p=>{
     if(p==='ゆっくりいきたい') return '🐢';
     if(p==='いつも通り')      return '🚶';
-    if(p==='いつもよりやれそう') return '🚀';
+    if(p==='今日は調子いい') return '🚀';
     return '—';
   };
   const paceClass = p=>{
     if(p==='ゆっくりいきたい') return 'pace-slow';
     if(p==='いつも通り')      return 'pace-mid';
-    if(p==='いつもよりやれそう') return 'pace-fast';
+    if(p==='今日は調子いい') return 'pace-fast';
     return 'no-record';
   };
 
@@ -1926,7 +1926,7 @@ async function renderToday(){
   // カード生成
   const recordedCards = recorded
     .sort((a,b)=>{
-      const order={'ゆっくりいきたい':0,'いつも通り':1,'いつもよりやれそう':2};
+      const order={'ゆっくりいきたい':0,'いつも通り':1,'今日は調子いい':2};
       return (order[a.pace||a.task]??1) - (order[b.pace||b.task]??1);
     })
     .map(r=>{
@@ -2057,7 +2057,7 @@ function buildStateVisual(record){
   document.getElementById('state-label').textContent=p.label;
   const paceV=record&&record.pace||'';
   let paceMsg='';
-  if(paceV==='いつもよりやれそう') paceMsg='今日は少しやってみましょう！';
+  if(paceV==='今日は調子いい') paceMsg='今日は少しやってみましょう！';
   else if(paceV==='いつも通り')   paceMsg='いつも通りのペースで進めましょう。';
   else if(paceV==='ゆっくりいきたい') paceMsg='今日はゆっくりいきましょう。';
   else paceMsg='自分のペースで進めましょう。';
