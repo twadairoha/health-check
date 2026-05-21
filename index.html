@@ -1993,11 +1993,9 @@ async function renderToday(){
   // 今日の記録を抽出（各人の最新1件）
   const todayRecs = {};
   allRecs.forEach(r=>{
-    if(!r.time) return;
-    const t = String(r.time);
-    // time形式: "2026/4/8 10:30" or "2026/04/08 10:30"
-    const datePart = t.split(' ')[0].replace(/\//g,'-');
-    const d = new Date(datePart);
+    // tsから直接日付を取得（UTC問題を回避）
+    if(!r.ts) return;
+    const d = new Date(Number(r.ts));
     if(d.getFullYear()===yy && d.getMonth()+1===parseInt(mm) && d.getDate()===parseInt(dd)){
       if(!todayRecs[r.name] || r.ts > todayRecs[r.name].ts){
         todayRecs[r.name] = r;
