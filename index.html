@@ -1213,9 +1213,9 @@ const sel={sleep:null,meal:null,mood:null,pace:null,focus:null};
 let selName=null;
 
 async function renderNameGrid(){
-  const names=await getNames(),g=document.getElementById('name-grid');
-  if(!names.length){g.innerHTML='<div class="no-names">名前が登録されていません。<br>「職員用ページへ」から登録してください。</div>';return;}
-  g.innerHTML=names.map(n=>`<button class="name-btn" onclick="pickName(this,'${esc(n)}')">${esc(n)}</button>`).join('');
+  // name-grid-stepに委譲（左カラムのname-gridは廃止）
+  await getNames(); // キャッシュ更新のみ
+  renderNameGridStep();
 }
 
 function pickName(btn,name){
@@ -1243,7 +1243,7 @@ function clearNameSelection(){
   selName=null;
   document.querySelectorAll('.name-btn').forEach(b=>b.classList.remove('selected'));
   document.getElementById('selected-name-bar').classList.remove('visible');
-  document.getElementById('name-grid').scrollIntoView({behavior:'smooth',block:'center'});
+  document.getElementById('step-wrap').scrollIntoView({behavior:'smooth',block:'start'});
   stopAutoReturn(); // ★追加：タイマー停止
 }
 
