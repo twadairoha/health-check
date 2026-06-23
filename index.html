@@ -602,7 +602,7 @@ body{font-family:'DM Sans','Noto Sans JP',sans-serif;background:var(--bg);color:
   transition:border-color .2s;
 }
 .today-card.pace-slow  { border-color:var(--bad);  background:var(--bad-bg); }
-.today-card.pace-mid   { border-color:var(--mid);  background:var(--mid-bg); }
+.today-card.pace-mid   { border-color:var(--primary); background:var(--blue-bg); }
 .today-card.pace-fast  { border-color:var(--good); background:var(--good-bg); }
 .today-card.no-record  { border-style:dashed; opacity:.5; }
 .today-name{
@@ -612,7 +612,7 @@ body{font-family:'DM Sans','Noto Sans JP',sans-serif;background:var(--bg);color:
   font-size:.9rem;font-weight:700;
 }
 .today-card.pace-slow  .today-pace { color:var(--bad); }
-.today-card.pace-mid   .today-pace { color:var(--mid); }
+.today-card.pace-mid   .today-pace { color:var(--primary); }
 .today-card.pace-fast  .today-pace { color:var(--good); }
 .today-card.no-record  .today-pace { color:var(--muted); }
 .today-meta{
@@ -852,7 +852,7 @@ body{font-family:'DM Sans','Noto Sans JP',sans-serif;background:var(--bg);color:
             </svg></div>
             <span class="c-label">ゆっくり<br>いきたい</span>
           </button>
-          <button class="choice-btn" data-value="いつも通り" data-sel="sel-mid" onclick="stepNext(this,'pace',5)">
+          <button class="choice-btn" data-value="いつも通り" data-sel="sel-blue" onclick="stepNext(this,'pace',5)">
             <div class="ic"><svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
               <circle cx="24" cy="24" r="14" stroke="var(--mid)" stroke-width="2" fill="var(--mid-bg)"/>
               <circle cx="24" cy="24" r="7" fill="var(--mid)" opacity=".5"/>
@@ -2072,7 +2072,7 @@ async function renderToday(){
         <div class="today-sum-l">🐢 ゆっくり</div>
       </div>
       <div class="today-sum-box">
-        <div class="today-sum-n" style="color:var(--mid)">${midCount}</div>
+        <div class="today-sum-n" style="color:var(--primary)">${midCount}</div>
         <div class="today-sum-l">🚶 いつも通り</div>
       </div>
       <div class="today-sum-box">
